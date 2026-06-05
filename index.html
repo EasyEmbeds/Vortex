@@ -11,25 +11,31 @@
     
     <style>
         /* 
-         * DESIGN SYSTEM & VARIABLES
-         * Dark Theme with Neon Cyan & Electric Purple
+         * DESIGN SYSTEM & VARIABLES (UPDATED: GOLD & BLUE THEME)
+         * Dark Theme with Luxury Gold & Deep Blue Accents
          */
         :root {
-            --bg-dark: #0a0a0a;
-            --bg-card: rgba(255, 255, 255, 0.03);
-            --bg-card-hover: rgba(255, 255, 255, 0.07);
-            --neon-cyan: #00f7d0;
-            --neon-purple: #bd00ff;
-            --text-main: #ffffff;
-            --text-muted: #a1a1aa;
+            /* Backgrounds */
+            --bg-dark: #050a14;          /* Deepest Midnight Blue */
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
             
+            /* Accents */
+            --gold-main: #D4AF37;        /* Classic Metallic Gold */
+            --gold-glow: #FFD700;        /* Bright Gold for glows */
+            --blue-accent: #4169E1;      /* Royal Blue */
+            
+            /* Text */
+            --text-main: #f0f0f0;
+            --text-muted: #8c9bb3;
+            
+            /* Fonts & Style */
             --font-display: 'Space Grotesk', sans-serif;
             --font-body: 'Inter', sans-serif;
-            
             --border-radius: 24px;
             --glass-blur: blur(16px);
-            --glow-cyan: 0 0 20px rgba(0, 247, 208, 0.4);
-            --glow-purple: 0 0 20px rgba(189, 0, 255, 0.4);
+            --glow-gold: 0 0 25px rgba(212, 175, 55, 0.3);
+            --glow-blue: 0 0 20px rgba(65, 105, 225, 0.4);
         }
 
         /* RESET & BASE */
@@ -45,9 +51,10 @@
             font-family: var(--font-body);
             line-height: 1.6;
             overflow-x: hidden;
+            /* Background Abstract Shape */
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(189, 0, 255, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 247, 208, 0.15) 0%, transparent 40%);
+                radial-gradient(circle at 10% 20%, rgba(65, 105, 225, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
             background-attachment: fixed;
         }
 
@@ -66,7 +73,7 @@
         }
 
         .text-gradient {
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            background: linear-gradient(135deg, var(--gold-main), var(--blue-accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -78,7 +85,7 @@
             top: 0;
             width: 100%;
             z-index: 100;
-            background: rgba(10, 10, 10, 0.8);
+            background: rgba(5, 10, 20, 0.85);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -94,6 +101,7 @@
             font-size: 1.5rem;
             font-weight: 700;
             letter-spacing: -1px;
+            color: var(--text-main);
         }
 
         .email-link {
@@ -105,8 +113,8 @@
         }
 
         .email-link:hover {
-            border-color: var(--neon-cyan);
-            color: var(--neon-cyan);
+            border-color: var(--gold-main);
+            color: var(--gold-main);
         }
 
         /* HERO SECTION */
@@ -140,21 +148,21 @@
             display: inline-block;
             padding: 1rem 3rem;
             background: transparent;
-            color: var(--neon-cyan);
-            border: 2px solid var(--neon-cyan);
+            color: var(--gold-main);
+            border: 2px solid var(--gold-main);
             font-family: var(--font-display);
             font-weight: 700;
             font-size: 1.2rem;
             border-radius: 12px;
-            box-shadow: var(--glow-cyan);
+            box-shadow: var(--glow-gold);
             transition: all 0.3s ease;
             cursor: pointer;
         }
 
         .btn-glow:hover {
-            background: var(--neon-cyan);
+            background: var(--gold-main);
             color: #000;
-            box-shadow: 0 0 40px rgba(0, 247, 208, 0.6);
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
             transform: translateY(-2px);
         }
 
@@ -176,7 +184,7 @@
             background: var(--bg-card);
             backdrop-filter: var(--glass-blur);
             -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: var(--border-radius);
             padding: 3rem 2rem;
             transition: 0.4s ease;
@@ -187,7 +195,7 @@
         .glass-card:hover {
             transform: translateY(-10px);
             background: var(--bg-card-hover);
-            border-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(212, 175, 55, 0.3);
         }
 
         .glass-card::before {
@@ -197,7 +205,7 @@
             left: 0;
             width: 100%;
             height: 4px;
-            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+            background: linear-gradient(90deg, var(--gold-main), var(--blue-accent));
             opacity: 0;
             transition: 0.4s;
         }
@@ -210,13 +218,14 @@
             font-family: var(--font-display);
             font-size: 1.8rem;
             margin-bottom: 0.5rem;
+            color: var(--text-main);
         }
 
         .plan-price {
             font-size: 3rem;
             font-weight: 700;
             margin-bottom: 2rem;
-            color: var(--text-main);
+            color: var(--gold-main);
         }
 
         .plan-price span {
@@ -235,7 +244,7 @@
 
         .features-list li::before {
             content: '✓';
-            color: var(--neon-cyan);
+            color: var(--blue-accent);
             font-weight: bold;
         }
 
@@ -244,28 +253,30 @@
             width: 100%;
             padding: 1rem;
             border: none;
-            background: rgba(255,255,255,0.05);
-            color: white;
+            background: rgba(65, 105, 225, 0.15);
+            color: var(--text-main);
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
             font-family: var(--font-display);
             text-transform: uppercase;
+            border: 1px solid var(--blue-accent);
         }
 
         .btn-card:hover {
-            background: var(--neon-purple);
-            box-shadow: var(--glow-purple);
+            background: var(--blue-accent);
+            box-shadow: var(--glow-blue);
+            color: white;
         }
 
         /* PAYMENT SECTION */
         .payment-section {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.02);
             border-radius: var(--border-radius);
             text-align: center;
             padding: 4rem 2rem;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(212, 175, 55, 0.1);
             max-width: 800px;
             margin: 0 auto 6rem auto;
         }
@@ -277,14 +288,14 @@
         }
 
         .nayapay-box {
-            background: #111;
+            background: #0f1623;
             display: inline-flex;
             align-items: center;
             gap: 1.5rem;
             padding: 1.5rem 2.5rem;
             border-radius: 16px;
-            border: 1px solid var(--neon-cyan);
-            box-shadow: var(--glow-cyan);
+            border: 1px solid var(--gold-main);
+            box-shadow: var(--glow-gold);
             margin: 2rem 0;
         }
 
@@ -292,7 +303,7 @@
             font-family: monospace;
             font-size: 2rem;
             letter-spacing: 2px;
-            color: var(--neon-cyan);
+            color: var(--gold-glow);
         }
 
         .btn-copy {
@@ -306,7 +317,7 @@
         }
 
         .btn-copy:hover {
-            background: var(--neon-cyan);
+            background: var(--gold-main);
             color: black;
         }
 
@@ -332,7 +343,7 @@
         }
 
         .footer-email {
-            color: var(--neon-purple);
+            color: var(--gold-main);
             font-weight: 600;
         }
 
@@ -346,7 +357,7 @@
         .toast {
             visibility: hidden;
             min-width: 300px;
-            background-color: #111;
+            background-color: #0f1623;
             color: #fff;
             text-align: center;
             border-radius: 8px;
@@ -356,7 +367,7 @@
             bottom: 30px;
             right: 30px;
             font-size: 14px;
-            border-left: 4px solid var(--neon-cyan);
+            border-left: 4px solid var(--gold-main);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             transform: translateY(100px);
             transition: transform 0.3s ease, visibility 0.3s;
@@ -433,8 +444,8 @@
                 </div>
 
                 <!-- Pro Plan -->
-                <div class="glass-card" style="border-color: var(--neon-purple);">
-                    <h3 class="plan-name" style="color: var(--neon-purple);">Pro</h3>
+                <div class="glass-card" style="border-color: var(--gold-main);">
+                    <h3 class="plan-name" style="color: var(--gold-main);">Pro</h3>
                     <div class="plan-price">$29.99<span>/one-time</span></div>
                     <ul class="features-list">
                         <li>Unlimited Pages</li>
@@ -485,7 +496,6 @@
                 showToast("Number copied to clipboard!");
             }).catch(err => {
                 console.error('Failed to copy: ', err);
-                // Fallback for older browsers
                 showToast("Could not copy automatically. Please select the number.");
             });
         }
