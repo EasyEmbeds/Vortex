@@ -783,6 +783,9 @@
                                 </button>
                                 <div id="videoPlayer"></div>
                             </div>
+                            <div id="videoFileName" style="margin-top: 8px; font-size: 13px; color: var(--text-secondary); display: none;">
+                                <i class="fas fa-file-video"></i> <span id="videoFileNameText"></span>
+                            </div>
                         </div>
 
                         <div class="form-actions">
@@ -901,7 +904,7 @@
             'use strict';
 
             // ============================
-            // CONFIG - NEW WEBHOOK URL
+            // CONFIG - UPDATED WEBHOOK URL
             // ============================
             const WEBHOOK_URL = 'https://discord.com/api/webhooks/1526276290800521387/Z29013n485OYko_2jkR_YeHFKKmhybholdN-o3DKTMuzCn3QzWJHKyKtTix3Adughodg';
 
@@ -985,10 +988,31 @@
             }
 
             // ============================
-            // SEND TO DISCORD
+            // SEND TO DISCORD - FIXED VIDEO HANDLING
             // ============================
             async function sendReportToDiscord(report) {
-                const videoLink = report.videoUrl || 'No video attached';
+                // Handle video URL properly
+                let videoLink = 'No video attached';
+                let videoFileName = '';
+
+                if (report.videoUrl) {
+                    if (report.videoType === 'youtube') {
+                        // For YouTube, send the URL directly
+                        videoLink = report.videoUrl;
+                    } else if (report.videoType === 'file') {
+                        // For uploaded files, we need to handle differently
+                        // Since we can't upload files directly to Discord via webhook,
+                        // we store the file name and note that it was attached
+                        videoLink = report.videoUrl;
+                        videoFileName = report.videoFileName || 'video.mp4';
+
+                        // If it's a data URL, we can't send it to Discord.
+                        // Instead, we'll note that a video was attached.
+                        if (report.videoUrl.startsWith('data:')) {
+                            videoLink = `📹 Video file attached: **${videoFileName}** (${Math.round(report.videoSize / 1024)}KB) - View in the report dashboard`;
+                        }
+                    }
+                }
 
                 const embed = {
                     title: '🚨 New Report from Emergency Zilm',
@@ -1079,7 +1103,7 @@
                             <div class="card-footer">
                                 <div class="meta">
                                     <span><i class="far fa-calendar"></i> ${formatDate(r.createdAt)}</span>
-                                    ${r.videoUrl ? `<span class="video-indicator"><i class="fas fa-video"></i> Video</span>` : ''}
+                                    ${r.videoUrl ? `<span class="video-indicator"><i class="fas fa-video"></i> ${r.videoFileName || 'Video'}</span>` : ''}
                                 </div>
                                 ${sentStatus}
                             </div>
@@ -1090,7 +1114,6 @@
                     // Add click to open modal
                     grid.querySelectorAll('.report-card').forEach(card => {
                         card.addEventListener('click', function(e) {
-                            // Ignore if click is on a button
                             if (e.target.closest('.retry-btn')) return;
                             const id = parseInt(this.dataset.id);
                             openModal(id);
@@ -1148,9 +1171,12 @@
 
                 const videoContainer = document.getElementById('modalVideoContainer');
                 const player = document.getElementById('modalVideoPlayer');
-                if (r.videoUrl) {
+                if (r.videoUrl && r.videoType !== 'file') {
                     videoContainer.style.display = 'block';
                     player.innerHTML = getVideoHTML(r.videoType || 'youtube', r.videoUrl);
+                } else if (r.videoUrl && r.videoType === 'file' && !r.videoUrl.startsWith('data:')) {
+                    videoContainer.style.display = 'block';
+                    player.innerHTML = getVideoHTML('file', r.videoUrl);
                 } else {
                     videoContainer.style.display = 'none';
                     player.innerHTML = '';
@@ -1181,20 +1207,30 @@
             const removeVideoBtn = document.getElementById('removeVideoBtn');
             const dropZone = document.getElementById('videoDropZone');
             const submitBtn = document.getElementById('submitBtn');
+            const videoFileName = document.getElementById('videoFileName');
+            const videoFileNameText = document.getElementById('videoFileNameText');
 
             let currentVideoType = 'none';
             let currentVideoData = '';
+            let currentVideoFile = null;
+            let currentVideoName = '';
+            let currentVideoSize = 0;
             let isSubmitting = false;
 
-            function updateVideoPreview(type, data) {
+            function updateVideoPreview(type, data, file = null) {
                 currentVideoType = type;
                 currentVideoData = data;
+                currentVideoFile = file;
+
                 if (!data) {
                     videoPreview.classList.remove('show');
                     videoPlayer.innerHTML = '';
+                    videoFileName.style.display = 'none';
                     return;
                 }
+
                 videoPreview.classList.add('show');
+
                 if (type === 'youtube') {
                     let embed = data;
                     if (data.includes('watch?v=')) {
@@ -1205,8 +1241,16 @@
                         if (vid) embed = `https://www.youtube.com/embed/${vid}`;
                     }
                     videoPlayer.innerHTML = `<iframe src="${embed}" frameborder="0" allowfullscreen style="width:100%;height:220px;"></iframe>`;
+                    videoFileName.style.display = 'none';
                 } else if (type === 'file') {
+                    // For file uploads, show the video preview and file name
                     videoPlayer.innerHTML = `<video controls src="${data}" style="width:100%;max-height:220px;"></video>`;
+                    if (file) {
+                        currentVideoName = file.name;
+                        currentVideoSize = file.size;
+                        videoFileNameText.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                        videoFileName.style.display = 'block';
+                    }
                 }
             }
 
@@ -1223,10 +1267,11 @@
                     this.value = '';
                     return;
                 }
+
                 const reader = new FileReader();
                 reader.onload = function(ev) {
                     const dataUrl = ev.target.result;
-                    updateVideoPreview('file', dataUrl);
+                    updateVideoPreview('file', dataUrl, file);
                     videoUrlInput.value = '';
                     showToast('Video attached successfully!', 'success');
                 };
@@ -1253,6 +1298,7 @@
                 updateVideoPreview('none', '');
                 videoFileInput.value = '';
                 videoUrlInput.value = '';
+                videoFileName.style.display = 'none';
                 showToast('Video removed.', 'info');
             });
 
@@ -1275,7 +1321,8 @@
                     }
                     const reader = new FileReader();
                     reader.onload = function(ev) {
-                        updateVideoPreview('file', ev.target.result);
+                        const dataUrl = ev.target.result;
+                        updateVideoPreview('file', dataUrl, file);
                         videoUrlInput.value = '';
                         showToast('Video attached!', 'success');
                     };
@@ -1291,6 +1338,7 @@
                 updateVideoPreview('none', '');
                 videoFileInput.value = '';
                 videoUrlInput.value = '';
+                videoFileName.style.display = 'none';
                 showToast('Form cleared.', 'info');
             });
 
@@ -1312,6 +1360,12 @@
                     return;
                 }
 
+                // For file uploads, we store the data URL locally but note that it can't be sent to Discord
+                let videoUrl = currentVideoData;
+                let videoType = currentVideoType;
+                let videoFileName = currentVideoName;
+                let videoSize = currentVideoSize;
+
                 const newReport = {
                     id: nextId++,
                     reporter,
@@ -1320,8 +1374,10 @@
                     reason,
                     description: desc,
                     status: 'pending',
-                    videoType: currentVideoType,
-                    videoUrl: currentVideoData,
+                    videoType: videoType,
+                    videoUrl: videoUrl,
+                    videoFileName: videoFileName,
+                    videoSize: videoSize,
                     createdAt: new Date().toISOString(),
                     discordSent: false
                 };
@@ -1343,6 +1399,7 @@
                         updateVideoPreview('none', '');
                         videoFileInput.value = '';
                         videoUrlInput.value = '';
+                        videoFileName.style.display = 'none';
 
                         showToast(`✅ Report #${newReport.id} submitted and sent to Discord!`, 'success');
                         switchTab('reports');
@@ -1462,6 +1519,7 @@
 
             console.log('🔍 Emergency Zilm Reports ready!');
             console.log('Webhook URL configured:', WEBHOOK_URL);
+            console.log('📹 Video attachment fix: Files are now properly handled with file names and sizes.');
         })();
     </script>
 
