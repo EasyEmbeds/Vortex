@@ -727,7 +727,7 @@
                     </div>
                     <p class="form-subtitle">
                         Provide details about the incident. All fields marked <span class="required">*</span> are required.
-                        Reports are sent directly to Discord.
+                        Reports are sent directly to Discord as simple messages.
                     </p>
 
                     <form id="reportForm" novalidate>
@@ -783,8 +783,8 @@
                                 </button>
                                 <div id="videoPlayer"></div>
                             </div>
-                            <div id="videoFileName" style="margin-top: 8px; font-size: 13px; color: var(--text-secondary); display: none;">
-                                <i class="fas fa-file-video"></i> <span id="videoFileNameText"></span>
+                            <div id="videoInfo" style="margin-top: 8px; font-size: 12px; color: var(--text-secondary); display: none;">
+                                <span id="videoInfoText"></span>
                             </div>
                         </div>
 
@@ -904,7 +904,7 @@
             'use strict';
 
             // ============================
-            // CONFIG - UPDATED WEBHOOK URL
+            // CONFIG
             // ============================
             const WEBHOOK_URL = 'https://discord.com/api/webhooks/1526276290800521387/Z29013n485OYko_2jkR_YeHFKKmhybholdN-o3DKTMuzCn3QzWJHKyKtTix3Adughodg';
 
@@ -988,49 +988,32 @@
             }
 
             // ============================
-            // SEND TO DISCORD - FIXED VIDEO HANDLING
+            // SEND TO DISCORD - SIMPLE TEXT MESSAGE
             // ============================
             async function sendReportToDiscord(report) {
-                // Handle video URL properly
-                let videoLink = 'No video attached';
-                let videoFileName = '';
-
+                // Build a simple text message
+                let message = `🚨 **NEW REPORT from Emergency Zilm**\n\n`;
+                message += `👤 **Reporter:** ${report.reporter}\n`;
+                message += `🎯 **Reported Player:** ${report.reported}\n`;
+                message += `📋 **Reason:** ${report.reason}\n`;
+                message += `📝 **Description:** ${report.description || 'No description provided.'}\n\n`;
+                
+                // Handle video link
                 if (report.videoUrl) {
                     if (report.videoType === 'youtube') {
-                        // For YouTube, send the URL directly
-                        videoLink = report.videoUrl;
+                        message += `🎬 **Video Evidence:** ${report.videoUrl}\n`;
                     } else if (report.videoType === 'file') {
-                        // For uploaded files, we need to handle differently
-                        // Since we can't upload files directly to Discord via webhook,
-                        // we store the file name and note that it was attached
-                        videoLink = report.videoUrl;
-                        videoFileName = report.videoFileName || 'video.mp4';
-
-                        // If it's a data URL, we can't send it to Discord.
-                        // Instead, we'll note that a video was attached.
-                        if (report.videoUrl.startsWith('data:')) {
-                            videoLink = `📹 Video file attached: **${videoFileName}** (${Math.round(report.videoSize / 1024)}KB) - View in the report dashboard`;
-                        }
+                        const fileName = report.videoFileName || 'video.mp4';
+                        const fileSize = report.videoSize ? `${(report.videoSize / 1024).toFixed(1)}KB` : 'Unknown size';
+                        message += `🎬 **Video Attached:** ${fileName} (${fileSize}) - View in the report dashboard\n`;
                     }
+                } else {
+                    message += `🎬 **Video Evidence:** No video attached\n`;
                 }
-
-                const embed = {
-                    title: '🚨 New Report from Emergency Zilm',
-                    color: 0x28a745,
-                    fields: [
-                        { name: '👤 Reporter', value: report.reporter, inline: true },
-                        { name: '🎯 Reported Player', value: report.reported, inline: true },
-                        { name: '📋 Reason', value: report.reason, inline: false },
-                        { name: '📝 Description', value: report.description || 'No description provided.', inline: false },
-                        { name: '🎬 Video Evidence', value: videoLink, inline: false },
-                        { name: '📊 Status', value: 'Pending', inline: true },
-                        { name: '🆔 Report ID', value: `#${report.id}`, inline: true },
-                    ],
-                    timestamp: new Date().toISOString(),
-                    footer: {
-                        text: 'Emergency Zilm Report System'
-                    }
-                };
+                
+                message += `\n🆔 **Report ID:** #${report.id}`;
+                message += `\n📊 **Status:** Pending`;
+                message += `\n🕐 **Reported at:** ${new Date().toISOString().replace('T', ' ').slice(0, 19)}`;
 
                 try {
                     const response = await fetch(WEBHOOK_URL, {
@@ -1038,7 +1021,7 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ embeds: [embed] })
+                        body: JSON.stringify({ content: message })
                     });
 
                     if (!response.ok) {
@@ -1207,8 +1190,8 @@
             const removeVideoBtn = document.getElementById('removeVideoBtn');
             const dropZone = document.getElementById('videoDropZone');
             const submitBtn = document.getElementById('submitBtn');
-            const videoFileName = document.getElementById('videoFileName');
-            const videoFileNameText = document.getElementById('videoFileNameText');
+            const videoInfo = document.getElementById('videoInfo');
+            const videoInfoText = document.getElementById('videoInfoText');
 
             let currentVideoType = 'none';
             let currentVideoData = '';
@@ -1225,7 +1208,7 @@
                 if (!data) {
                     videoPreview.classList.remove('show');
                     videoPlayer.innerHTML = '';
-                    videoFileName.style.display = 'none';
+                    videoInfo.style.display = 'none';
                     return;
                 }
 
@@ -1241,15 +1224,22 @@
                         if (vid) embed = `https://www.youtube.com/embed/${vid}`;
                     }
                     videoPlayer.innerHTML = `<iframe src="${embed}" frameborder="0" allowfullscreen style="width:100%;height:220px;"></iframe>`;
-                    videoFileName.style.display = 'none';
+                    videoInfo.style.display = 'block';
+                    videoInfoText.innerHTML = `✅ YouTube video: <a href="${data}" target="_blank">${data}</a>`;
+                    videoInfoText.style.color = 'var(--green)';
                 } else if (type === 'file') {
-                    // For file uploads, show the video preview and file name
                     videoPlayer.innerHTML = `<video controls src="${data}" style="width:100%;max-height:220px;"></video>`;
                     if (file) {
                         currentVideoName = file.name;
                         currentVideoSize = file.size;
-                        videoFileNameText.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-                        videoFileName.style.display = 'block';
+                        const extension = file.name.split('.').pop().toLowerCase();
+                        const isMP4 = extension === 'mp4';
+                        videoInfo.style.display = 'block';
+                        videoInfoText.innerHTML = `
+                            📹 File: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB) 
+                            ${isMP4 ? '✅ MP4 format - Good!' : '⚠️ Not MP4 - Discord may not play it directly'}
+                        `;
+                        videoInfoText.style.color = isMP4 ? 'var(--green)' : 'var(--orange)';
                     }
                 }
             }
@@ -1298,7 +1288,7 @@
                 updateVideoPreview('none', '');
                 videoFileInput.value = '';
                 videoUrlInput.value = '';
-                videoFileName.style.display = 'none';
+                videoInfo.style.display = 'none';
                 showToast('Video removed.', 'info');
             });
 
@@ -1338,7 +1328,7 @@
                 updateVideoPreview('none', '');
                 videoFileInput.value = '';
                 videoUrlInput.value = '';
-                videoFileName.style.display = 'none';
+                videoInfo.style.display = 'none';
                 showToast('Form cleared.', 'info');
             });
 
@@ -1360,12 +1350,6 @@
                     return;
                 }
 
-                // For file uploads, we store the data URL locally but note that it can't be sent to Discord
-                let videoUrl = currentVideoData;
-                let videoType = currentVideoType;
-                let videoFileName = currentVideoName;
-                let videoSize = currentVideoSize;
-
                 const newReport = {
                     id: nextId++,
                     reporter,
@@ -1374,10 +1358,10 @@
                     reason,
                     description: desc,
                     status: 'pending',
-                    videoType: videoType,
-                    videoUrl: videoUrl,
-                    videoFileName: videoFileName,
-                    videoSize: videoSize,
+                    videoType: currentVideoType,
+                    videoUrl: currentVideoData,
+                    videoFileName: currentVideoName,
+                    videoSize: currentVideoSize,
                     createdAt: new Date().toISOString(),
                     discordSent: false
                 };
@@ -1399,7 +1383,7 @@
                         updateVideoPreview('none', '');
                         videoFileInput.value = '';
                         videoUrlInput.value = '';
-                        videoFileName.style.display = 'none';
+                        videoInfo.style.display = 'none';
 
                         showToast(`✅ Report #${newReport.id} submitted and sent to Discord!`, 'success');
                         switchTab('reports');
@@ -1518,8 +1502,8 @@
             renderReports();
 
             console.log('🔍 Emergency Zilm Reports ready!');
-            console.log('Webhook URL configured:', WEBHOOK_URL);
-            console.log('📹 Video attachment fix: Files are now properly handled with file names and sizes.');
+            console.log('📝 Using simple text messages for Discord (no embeds)');
+            console.log('📹 Video files will be listed with their names and sizes');
         })();
     </script>
 
