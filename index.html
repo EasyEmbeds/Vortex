@@ -55,6 +55,7 @@
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 8px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent-dark); }
 
+        /* --- LOGIN MODAL --- */
         .login-overlay {
             position: fixed;
             inset: 0;
@@ -150,11 +151,14 @@
             display: block;
         }
 
+        /* --- LAYOUT --- */
         .app-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 24px 40px;
         }
+
+        /* --- HEADER --- */
         .app-header {
             display: flex;
             align-items: center;
@@ -232,6 +236,7 @@
             gap: 6px;
         }
 
+        /* --- NAV TABS --- */
         .nav-tabs {
             display: flex;
             gap: 4px;
@@ -274,6 +279,7 @@
         }
         .nav-tab.active .count { background: rgba(255, 255, 255, 0.25); }
 
+        /* --- PANELS --- */
         .panel { display: none; animation: fadeUp 0.3s ease; margin-top: 24px; }
         .panel.active { display: block; }
         @keyframes fadeUp {
@@ -281,6 +287,7 @@
             100% { opacity: 1; transform: translateY(0); }
         }
 
+        /* --- FORM --- */
         .form-card {
             background: var(--bg-card);
             border-radius: var(--radius);
@@ -344,6 +351,7 @@
         }
         @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
 
+        /* --- VIDEO UPLOAD --- */
         .video-upload-area {
             border: 2px dashed var(--border-color);
             border-radius: var(--radius-sm);
@@ -421,6 +429,7 @@
         }
         .video-tips i { margin-right: 8px; }
 
+        /* --- BUTTONS --- */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -470,6 +479,7 @@
             flex-wrap: wrap;
         }
 
+        /* --- REPORTS LIST --- */
         .reports-toolbar {
             display: flex;
             flex-wrap: wrap;
@@ -526,6 +536,7 @@
         }
         .reports-toolbar .filter-group select:focus { border-color: var(--accent); }
 
+        /* --- REPORT CARDS --- */
         .reports-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -608,6 +619,7 @@
             line-height: 1.5;
         }
 
+        /* --- VIDEO PLAYER IN CARD --- */
         .report-card .video-container {
             width: 100%;
             margin-bottom: 12px;
@@ -615,7 +627,6 @@
             overflow: hidden;
             background: #000;
             display: none;
-            position: relative;
         }
         .report-card .video-container.show {
             display: block;
@@ -655,20 +666,6 @@
             color: var(--accent);
             font-weight: 500;
         }
-        .report-card .card-footer .sent-status {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 2px 10px;
-            border-radius: 20px;
-        }
-        .report-card .card-footer .sent-status.sent {
-            background: var(--green-bg);
-            color: var(--green);
-        }
-        .report-card .card-footer .sent-status.pending {
-            background: var(--yellow-bg);
-            color: #856404;
-        }
 
         .reports-locked {
             text-align: center;
@@ -703,6 +700,7 @@
         }
         .empty-state h3 { color: var(--text-primary); margin-bottom: 4px; }
 
+        /* --- MODAL --- */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -713,13 +711,8 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            animation: fadeIn 0.2s ease;
         }
         .modal-overlay.open { display: flex; }
-        @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-        }
         .modal-content {
             background: var(--bg-primary);
             border-radius: var(--radius);
@@ -730,11 +723,6 @@
             padding: 32px 36px;
             border: 1px solid var(--border-color);
             box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
-            animation: slideUpModal 0.25s ease;
-        }
-        @keyframes slideUpModal {
-            0% { opacity: 0; transform: translateY(20px) scale(0.98); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
         .modal-content .modal-close {
             float: right;
@@ -796,6 +784,7 @@
             flex-wrap: wrap;
         }
 
+        /* --- TOAST --- */
         .toast-container {
             position: fixed;
             bottom: 28px;
@@ -851,14 +840,16 @@
 </head>
 <body>
 
+    <!-- ============================================================ -->
     <!-- LOGIN MODAL -->
+    <!-- ============================================================ -->
     <div class="login-overlay" id="loginOverlay">
         <div class="login-box">
             <div class="logo">
                 <i class="fas fa-shield-alt"></i> Emergency Zilm
             </div>
             <p class="subtitle">Enter admin credentials to view reports</p>
-            <div id="loginForm">
+            <div>
                 <div class="form-group">
                     <label>Username</label>
                     <input type="text" id="loginUser" placeholder="Enter username" value="admin" />
@@ -867,7 +858,7 @@
                     <label>Password</label>
                     <input type="password" id="loginPass" placeholder="Enter password" />
                 </div>
-                <button class="btn-primary" id="loginBtn" onclick="handleLogin()">
+                <button class="btn-primary" onclick="handleLogin()">
                     <i class="fas fa-lock"></i> Login
                 </button>
                 <div class="error" id="loginError">❌ Invalid credentials. Try again.</div>
@@ -875,9 +866,12 @@
         </div>
     </div>
 
+    <!-- ============================================================ -->
     <!-- APP -->
+    <!-- ============================================================ -->
     <div class="app-container">
 
+        <!-- HEADER -->
         <header class="app-header">
             <div class="logo">
                 <i class="fas fa-shield-alt"></i>
@@ -896,107 +890,110 @@
             </div>
         </header>
 
-        <div class="nav-tabs" role="tablist">
-            <button class="nav-tab active" data-tab="submit" role="tab" onclick="switchTab('submit')">
+        <!-- NAV TABS -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('submit')">
                 <i class="fas fa-pen-to-square"></i> Submit Report
             </button>
-            <button class="nav-tab" data-tab="reports" role="tab" onclick="switchTab('reports')">
+            <button class="nav-tab" onclick="switchTab('reports')">
                 <i class="fas fa-list"></i> All Reports
                 <span class="count" id="reportCount">0</span>
             </button>
         </div>
 
-        <!-- SUBMIT PANEL -->
-        <section class="panel active" id="panel-submit" role="tabpanel">
-            <div class="submit-wrapper">
-                <div class="form-card">
-                    <div class="form-title">
-                        <i class="fas fa-flag"></i> File a Report
-                    </div>
-                    <p class="form-subtitle">
-                        Provide details about the incident. All fields marked <span class="required">*</span> are required.
-                        Reports are sent to Discord and saved locally.
-                    </p>
-
-                    <div class="video-tips">
-                        <i class="fas fa-lightbulb"></i>
-                        <strong>💡 Video will be saved and shown in reports!</strong> 
-                        Upload MP4, WebM, or MOV files, or paste a YouTube URL.
-                    </div>
-
-                    <form id="reportForm" onsubmit="return false;">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Your Username <span class="required">*</span></label>
-                                <input type="text" id="reporterName" placeholder="e.g. xX_Player_Xx" required />
-                            </div>
-                            <div class="form-group">
-                                <label>Reported Player <span class="required">*</span></label>
-                                <input type="text" id="reportedPlayer" placeholder="e.g. Offender123" required />
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Reason <span class="required">*</span></label>
-                            <select id="reasonSelect" required>
-                                <option value="">— Select a reason —</option>
-                                <option value="Exploiting / Hacking">Exploiting / Hacking</option>
-                                <option value="Harassment / Bullying">Harassment / Bullying</option>
-                                <option value="Inappropriate Content">Inappropriate Content</option>
-                                <option value="Scamming / Fraud">Scamming / Fraud</option>
-                                <option value="Team Griefing">Team Griefing</option>
-                                <option value="Chat Abuse">Chat Abuse</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Description <span class="required">*</span></label>
-                            <textarea id="reportDesc" placeholder="Describe what happened in detail…" required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Video Evidence</label>
-                            <div class="video-upload-area" id="videoDropZone">
-                                <i class="fas fa-video"></i>
-                                <p>Drop a video file or click to browse</p>
-                                <span class="hint">MP4, WebM, MOV · Max 50MB</span>
-                                <input type="file" id="videoFileInput" accept="video/*" />
-                            </div>
-                            <div style="margin-top:10px;">
-                                <input
-                                type="text"
-                                id="videoUrlInput"
-                                placeholder="Or paste a YouTube / video URL"
-                                style="width:100%;padding:9px 14px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-family:inherit;font-size:13px;outline:none;"
-                                />
-                            </div>
-                            <div class="video-preview" id="videoPreview">
-                                <button class="remove-video" id="removeVideoBtn" onclick="removeVideo()" title="Remove video">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                <div id="videoPlayer"></div>
-                            </div>
-                            <div id="videoInfo" style="margin-top: 8px; font-size: 12px; color: var(--text-secondary); display: none;">
-                                <span id="videoInfoText"></span>
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-primary" onclick="submitReport()">
-                                <i class="fas fa-paper-plane"></i> Submit Report
-                            </button>
-                            <button type="button" class="btn" onclick="resetForm()">
-                                <i class="fas fa-undo"></i> Clear
-                            </button>
-                        </div>
-                    </form>
+        <!-- ============================================================ -->
+        <!-- PANEL: SUBMIT -->
+        <!-- ============================================================ -->
+        <section class="panel active" id="panel-submit">
+            <div class="form-card">
+                <div class="form-title">
+                    <i class="fas fa-flag"></i> File a Report
                 </div>
+                <p class="form-subtitle">
+                    Provide details about the incident. All fields marked <span class="required">*</span> are required.
+                    Reports are saved locally and shown in the All Reports section.
+                </p>
+
+                <div class="video-tips">
+                    <i class="fas fa-lightbulb"></i>
+                    <strong>💡 Video will be saved and shown in reports!</strong> 
+                    Upload MP4, WebM, or MOV files, or paste a YouTube URL.
+                </div>
+
+                <form onsubmit="return false;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Your Username <span class="required">*</span></label>
+                            <input type="text" id="reporterName" placeholder="e.g. xX_Player_Xx" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Reported Player <span class="required">*</span></label>
+                            <input type="text" id="reportedPlayer" placeholder="e.g. Offender123" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Reason <span class="required">*</span></label>
+                        <select id="reasonSelect" required>
+                            <option value="">— Select a reason —</option>
+                            <option value="Exploiting / Hacking">Exploiting / Hacking</option>
+                            <option value="Harassment / Bullying">Harassment / Bullying</option>
+                            <option value="Inappropriate Content">Inappropriate Content</option>
+                            <option value="Scamming / Fraud">Scamming / Fraud</option>
+                            <option value="Team Griefing">Team Griefing</option>
+                            <option value="Chat Abuse">Chat Abuse</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description <span class="required">*</span></label>
+                        <textarea id="reportDesc" placeholder="Describe what happened in detail…" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Video Evidence</label>
+                        <div class="video-upload-area" id="videoDropZone">
+                            <i class="fas fa-video"></i>
+                            <p>Drop a video file or click to browse</p>
+                            <span class="hint">MP4, WebM, MOV · Max 50MB</span>
+                            <input type="file" id="videoFileInput" accept="video/*" />
+                        </div>
+                        <div style="margin-top:10px;">
+                            <input
+                            type="text"
+                            id="videoUrlInput"
+                            placeholder="Or paste a YouTube / video URL"
+                            style="width:100%;padding:9px 14px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-family:inherit;font-size:13px;outline:none;"
+                            />
+                        </div>
+                        <div class="video-preview" id="videoPreview">
+                            <button class="remove-video" onclick="removeVideo()" title="Remove video">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <div id="videoPlayer"></div>
+                        </div>
+                        <div id="videoInfo" style="margin-top: 8px; font-size: 12px; color: var(--text-secondary); display: none;">
+                            <span id="videoInfoText"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" onclick="submitReport()">
+                            <i class="fas fa-paper-plane"></i> Submit Report
+                        </button>
+                        <button type="button" class="btn" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Clear
+                        </button>
+                    </div>
+                </form>
             </div>
         </section>
 
-        <!-- REPORTS PANEL -->
-        <section class="panel" id="panel-reports" role="tabpanel">
+        <!-- ============================================================ -->
+        <!-- PANEL: REPORTS -->
+        <!-- ============================================================ -->
+        <section class="panel" id="panel-reports">
             
             <div id="reportsContent" style="display:none;">
                 <div class="reports-toolbar">
@@ -1047,7 +1044,9 @@
 
     </div>
 
+    <!-- ============================================================ -->
     <!-- MODAL -->
+    <!-- ============================================================ -->
     <div class="modal-overlay" id="detailModal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal()">&times;</button>
@@ -1077,33 +1076,35 @@
                 <div id="modalVideoPlayer"></div>
             </div>
 
-            <div class="modal-actions" id="modalActions">
-                <button class="btn btn-sm btn-success" data-action="resolved" onclick="handleAction('resolved')">
+            <div class="modal-actions">
+                <button class="btn btn-sm btn-success" onclick="handleAction('resolved')">
                     <i class="fas fa-check"></i> Resolve
                 </button>
-                <button class="btn btn-sm" data-action="reviewed" onclick="handleAction('reviewed')" style="border-color:var(--blue);color:var(--blue);">
+                <button class="btn btn-sm" onclick="handleAction('reviewed')" style="border-color:var(--blue);color:var(--blue);">
                     <i class="fas fa-eye"></i> Mark Reviewed
                 </button>
-                <button class="btn btn-sm btn-danger" data-action="rejected" onclick="handleAction('rejected')">
+                <button class="btn btn-sm btn-danger" onclick="handleAction('rejected')">
                     <i class="fas fa-times"></i> Reject
                 </button>
-                <button class="btn btn-sm btn-danger" data-action="delete" onclick="handleAction('delete')" style="background:transparent;border-color:var(--red);color:var(--red);margin-left:auto;">
+                <button class="btn btn-sm btn-danger" onclick="handleAction('delete')" style="background:transparent;border-color:var(--red);color:var(--red);margin-left:auto;">
                     <i class="fas fa-trash-can"></i> Delete
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- TOAST CONTAINER -->
+    <!-- ============================================================ -->
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT - COMPLETELY FIXED -->
+    <!-- JAVASCRIPT -->
     <!-- ============================================================ -->
     <script>
         // ============================================================
         // CONFIG
         // ============================================================
-        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1526276290800521387/Z29013n485OYko_2jkR_YeHFKKmhybholdN-o3DKTMuzCn3QzWJHKyKtTix3Adughodg';
         const ADMIN_USER = 'admin';
         const ADMIN_PASS = 'emzdev';
         const STORAGE_KEY = 'emergencyZilmReports';
@@ -1172,7 +1173,7 @@
         });
 
         // ============================================================
-        // DATA FUNCTIONS - FIXED: Properly saves and loads video data
+        // DATA FUNCTIONS - SAVES TO LOCAL STORAGE
         // ============================================================
         function loadData() {
             try {
@@ -1192,15 +1193,22 @@
             reports.forEach(r => {
                 if (!r.id) r.id = nextId++;
             });
+            updateCounts();
         }
 
         function saveData() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({ reports, nextId }));
+                updateCounts();
             } catch (e) {
                 console.warn('Storage quota exceeded:', e);
                 showToast('⚠️ Storage is full! Video data may not be saved.', 'error');
             }
+        }
+
+        function updateCounts() {
+            document.getElementById('totalReports').textContent = reports.length;
+            document.getElementById('reportCount').textContent = reports.length;
         }
 
         // ============================================================
@@ -1213,10 +1221,10 @@
 
         function getStatusBadge(status) {
             const map = {
-                pending: '<span class="badge-status pending"><span class="status-dot pending"></span>Pending</span>',
-                reviewed: '<span class="badge-status reviewed"><span class="status-dot reviewed"></span>Reviewed</span>',
-                resolved: '<span class="badge-status resolved"><span class="status-dot resolved"></span>Resolved</span>',
-                rejected: '<span class="badge-status rejected"><span class="status-dot rejected"></span>Rejected</span>',
+                pending: '<span class="badge-status pending">Pending</span>',
+                reviewed: '<span class="badge-status reviewed">Reviewed</span>',
+                resolved: '<span class="badge-status resolved">Resolved</span>',
+                rejected: '<span class="badge-status rejected">Rejected</span>',
             };
             return map[status] || map.pending;
         }
@@ -1248,49 +1256,7 @@
         }
 
         // ============================================================
-        // SEND TO DISCORD
-        // ============================================================
-        async function sendReportToDiscord(report) {
-            let message = `🚨 **NEW REPORT from Emergency Zilm**\n\n`;
-            message += `👤 **Reporter:** ${report.reporter}\n`;
-            message += `🎯 **Reported Player:** ${report.reported}\n`;
-            message += `📋 **Reason:** ${report.reason}\n`;
-            message += `📝 **Description:** ${report.description || 'No description provided.'}\n\n`;
-            
-            if (report.videoUrl) {
-                if (report.videoType === 'youtube') {
-                    message += `🎬 **Video Evidence:** ${report.videoUrl}\n`;
-                } else if (report.videoType === 'file') {
-                    const fileName = report.videoFileName || 'video.mp4';
-                    const fileSize = report.videoSize ? `${(report.videoSize / 1024).toFixed(1)}KB` : 'Unknown size';
-                    message += `🎬 **Video Attached:** ${fileName} (${fileSize})\n`;
-                }
-            } else {
-                message += `🎬 **Video Evidence:** No video attached\n`;
-            }
-            
-            message += `\n🆔 **Report ID:** #${report.id}`;
-            message += `\n📊 **Status:** Pending`;
-            message += `\n🕐 **Reported at:** ${new Date().toISOString().replace('T', ' ').slice(0, 19)}`;
-
-            try {
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: message })
-                });
-                if (!response.ok) {
-                    throw new Error(`Discord returned ${response.status}`);
-                }
-                return { success: true };
-            } catch (error) {
-                console.error('Discord send failed:', error);
-                return { success: false, error: error.message };
-            }
-        }
-
-        // ============================================================
-        // RENDER REPORTS - FIXED: Shows ALL reports with videos
+        // RENDER REPORTS - SHOWS ALL REPORTS WITH VIDEOS
         // ============================================================
         function renderReports() {
             if (!isLoggedIn) {
@@ -1307,10 +1273,8 @@
             const statusFilter = document.getElementById('filterStatus').value;
             const reasonFilter = document.getElementById('filterReason').value;
 
-            // Load fresh data
             loadData();
 
-            // Show ALL reports
             let filtered = reports.filter(r => {
                 const matchSearch = (r.reporter || '').toLowerCase().includes(search) ||
                     (r.reported || '').toLowerCase().includes(search);
@@ -1331,21 +1295,15 @@
                 `;
             } else {
                 grid.innerHTML = filtered.map(r => {
-                    const sentStatus = r.discordSent ?
-                        '<span class="sent-status sent"><i class="fas fa-check-circle"></i> Sent to Discord</span>' :
-                        '<span class="sent-status pending"><i class="fas fa-clock"></i> Pending send</span>';
-
                     let videoHTML = '';
                     let hasVideo = false;
                     
-                    // Check for video data
                     if (r.videoUrl) {
                         if (r.videoType === 'youtube') {
                             const embed = getEmbedUrl(r.videoUrl);
                             videoHTML = `<iframe src="${embed}" frameborder="0" allowfullscreen></iframe>`;
                             hasVideo = true;
-                        } else if (r.videoType === 'file') {
-                            // For uploaded videos - this will work with data URLs
+                        } else if (r.videoType === 'file' && r.videoUrl) {
                             videoHTML = `<video controls src="${r.videoUrl}" preload="metadata"></video>`;
                             hasVideo = true;
                         }
@@ -1373,37 +1331,16 @@
                                 <span><i class="far fa-calendar"></i> ${formatDate(r.createdAt)}</span>
                                 ${hasVideo ? `<span class="video-indicator"><i class="fas fa-video"></i> Video</span>` : ''}
                             </div>
-                            ${sentStatus}
                         </div>
-                        ${!r.discordSent ? `<div style="margin-top:8px;text-align:right;"><button class="btn btn-sm retry-btn" onclick="event.stopPropagation();retryDiscord(${r.id})" style="color:var(--blue);border-color:var(--blue);"><i class="fas fa-redo"></i> Retry Discord</button></div>` : ''}
                     </div>
                 `}).join('');
             }
 
-            document.getElementById('totalReports').textContent = reports.length;
-            document.getElementById('reportCount').textContent = reports.length;
+            updateCounts();
         }
 
         // ============================================================
-        // RETRY DISCORD
-        // ============================================================
-        async function retryDiscord(id) {
-            const report = reports.find(r => r.id === id);
-            if (!report) return;
-
-            const result = await sendReportToDiscord(report);
-            if (result.success) {
-                report.discordSent = true;
-                saveData();
-                renderReports();
-                showToast(`✅ Report #${id} sent to Discord!`, 'success');
-            } else {
-                showToast(`❌ Failed: ${result.error}`, 'error');
-            }
-        }
-
-        // ============================================================
-        // MODAL
+        // MODAL FUNCTIONS
         // ============================================================
         function openModal(id) {
             if (!isLoggedIn) {
@@ -1438,10 +1375,6 @@
                 videoContainer.style.display = 'none';
                 player.innerHTML = '';
             }
-
-            document.querySelectorAll('#modalActions [data-action]').forEach(btn => {
-                btn.dataset.reportId = r.id;
-            });
 
             modal.classList.add('open');
             document.body.style.overflow = 'hidden';
@@ -1531,7 +1464,7 @@
             showToast('Form cleared.', 'info');
         }
 
-        async function submitReport() {
+        function submitReport() {
             const reporter = document.getElementById('reporterName').value.trim();
             const reported = document.getElementById('reportedPlayer').value.trim();
             const reason = document.getElementById('reasonSelect').value;
@@ -1553,31 +1486,14 @@
                 videoUrl: currentVideoData,
                 videoFileName: currentVideoName,
                 videoSize: currentVideoSize,
-                createdAt: new Date().toISOString(),
-                discordSent: false
+                createdAt: new Date().toISOString()
             };
 
-            const submitBtn = document.querySelector('#panel-submit .btn-primary');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-
-            try {
-                const result = await sendReportToDiscord(newReport);
-                if (result.success) newReport.discordSent = true;
-
-                reports.push(newReport);
-                saveData();
-                renderReports();
-
-                resetForm();
-                showToast(`✅ Report #${newReport.id} saved${result.success ? ' and sent to Discord!' : '! Discord send failed, will retry later.'}`, 
-                    result.success ? 'success' : 'info');
-            } catch (error) {
-                showToast(`❌ Error: ${error.message}`, 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Report';
-            }
+            reports.push(newReport);
+            saveData();
+            renderReports();
+            resetForm();
+            showToast(`✅ Report #${newReport.id} saved successfully!`, 'success');
         }
 
         // ============================================================
@@ -1661,7 +1577,14 @@
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.getElementById(`panel-${tabId}`).classList.add('active');
-            document.querySelector(`.nav-tab[data-tab="${tabId}"]`).classList.add('active');
+            
+            // Find the tab button that matches and add active class
+            document.querySelectorAll('.nav-tab').forEach(t => {
+                if (t.textContent.toLowerCase().includes(tabId === 'submit' ? 'submit' : 'all')) {
+                    t.classList.add('active');
+                }
+            });
+            
             if (tabId === 'reports') {
                 renderReports();
             }
@@ -1719,13 +1642,11 @@
             renderReports();
         }
 
-        document.getElementById('totalReports').textContent = reports.length;
-        document.getElementById('reportCount').textContent = reports.length;
+        updateCounts();
 
         console.log('🚀 Emergency Zilm Report System ready!');
         console.log('🔑 Login: admin / emzdev');
         console.log('📊 Total reports:', reports.length);
-        console.log('📹 Reports with video:', reports.filter(r => r.videoUrl).length);
     </script>
 
 </body>
