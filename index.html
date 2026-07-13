@@ -28,7 +28,6 @@
             --text-secondary: #495057;
             --text-muted: #6c757d;
             --accent: #28a745;
-            --accent-light: #34ce57;
             --accent-dark: #1e7e34;
             --green: #28a745;
             --green-bg: rgba(40, 167, 69, 0.12);
@@ -335,6 +334,16 @@
             box-shadow: 0 4px 16px rgba(40, 167, 69, 0.35);
             color: #fff;
         }
+        .btn-danger {
+            background: var(--red);
+            color: #fff;
+            border-color: var(--red);
+        }
+        .btn-danger:hover {
+            background: #c82333;
+            border-color: #c82333;
+            color: #fff;
+        }
         .btn-sm { padding: 6px 14px; font-size: 12px; }
         .form-actions {
             display: flex;
@@ -500,6 +509,20 @@
         }
         .report-card .card-footer .meta i { margin-right: 3px; }
         .report-card .card-footer .video-indicator { color: var(--accent); }
+        .report-card .card-footer .sent-status {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+        .report-card .card-footer .sent-status.sent {
+            background: var(--green-bg);
+            color: var(--green);
+        }
+        .report-card .card-footer .sent-status.pending {
+            background: var(--yellow-bg);
+            color: #856404;
+        }
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
@@ -704,6 +727,7 @@
                     </div>
                     <p class="form-subtitle">
                         Provide details about the incident. All fields marked <span class="required">*</span> are required.
+                        Reports are sent directly to Discord.
                     </p>
 
                     <form id="reportForm" novalidate>
@@ -717,8 +741,6 @@
                                 <input type="text" id="reportedPlayer" placeholder="e.g. Offender123" required />
                             </div>
                         </div>
-
-                        <!-- Removed Date & Time field -->
 
                         <div class="form-group">
                             <label>Reason <span class="required">*</span></label>
@@ -764,7 +786,7 @@
                         </div>
 
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
                                 <i class="fas fa-paper-plane"></i> Submit Report
                             </button>
                             <button type="reset" class="btn" id="resetFormBtn">
@@ -879,9 +901,9 @@
             'use strict';
 
             // ============================
-            // CONFIG
+            // CONFIG - NEW WEBHOOK URL
             // ============================
-            const WEBHOOK_URL = 'https://discord.com/api/webhooks/1526272452240478379/9FNrMR8BxG8TRn3OXwytOYJ6TJd5GIJoMRJyZYcSgtIg975Qzf8Y1JWjYbXsMQFYlGWH';
+            const WEBHOOK_URL = 'https://discord.com/api/webhooks/1526276290800521387/Z29013n485OYko_2jkR_YeHFKKmhybholdN-o3DKTMuzCn3QzWJHKyKtTix3Adughodg';
 
             // ============================
             // DATA LAYER (local storage)
@@ -967,41 +989,48 @@
             // ============================
             async function sendReportToDiscord(report) {
                 const videoLink = report.videoUrl || 'No video attached';
+
                 const embed = {
                     title: '🚨 New Report from Emergency Zilm',
                     color: 0x28a745,
                     fields: [
-                        { name: 'Reporter', value: report.reporter, inline: true },
-                        { name: 'Reported Player', value: report.reported, inline: true },
-                        { name: 'Reason', value: report.reason, inline: false },
-                        { name: 'Description', value: report.description || 'No description provided.', inline: false },
-                        { name: 'Video Evidence', value: videoLink, inline: false },
-                        { name: 'Status', value: 'Pending', inline: true },
+                        { name: '👤 Reporter', value: report.reporter, inline: true },
+                        { name: '🎯 Reported Player', value: report.reported, inline: true },
+                        { name: '📋 Reason', value: report.reason, inline: false },
+                        { name: '📝 Description', value: report.description || 'No description provided.', inline: false },
+                        { name: '🎬 Video Evidence', value: videoLink, inline: false },
+                        { name: '📊 Status', value: 'Pending', inline: true },
+                        { name: '🆔 Report ID', value: `#${report.id}`, inline: true },
                     ],
                     timestamp: new Date().toISOString(),
-                    footer: { text: `Report #${report.id}` }
+                    footer: {
+                        text: 'Emergency Zilm Report System'
+                    }
                 };
 
                 try {
                     const response = await fetch(WEBHOOK_URL, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
                         body: JSON.stringify({ embeds: [embed] })
                     });
+
                     if (!response.ok) {
                         const errorText = await response.text();
-                        throw new Error(`Discord webhook error: ${response.status} ${errorText}`);
+                        throw new Error(`Discord returned ${response.status}: ${errorText}`);
                     }
-                    return true;
+
+                    return { success: true, status: response.status };
                 } catch (error) {
                     console.error('Failed to send to Discord:', error);
-                    showToast(`Failed to send to Discord: ${error.message}`, 'error');
-                    return false;
+                    return { success: false, error: error.message };
                 }
             }
 
             // ============================
-            // RENDER REPORTS (local)
+            // RENDER REPORTS
             // ============================
             function renderReports() {
                 const grid = document.getElementById('reportsGrid');
@@ -1028,7 +1057,12 @@
                         </div>
                     `;
                 } else {
-                    grid.innerHTML = filtered.map(r => `
+                    grid.innerHTML = filtered.map(r => {
+                        const sentStatus = r.discordSent ?
+                            '<span class="sent-status sent"><i class="fas fa-check-circle"></i> Sent to Discord</span>' :
+                            '<span class="sent-status pending"><i class="fas fa-clock"></i> Pending send</span>';
+
+                        return `
                         <div class="report-card" data-id="${r.id}">
                             <div class="card-header">
                                 <div class="players">
@@ -1047,15 +1081,44 @@
                                     <span><i class="far fa-calendar"></i> ${formatDate(r.createdAt)}</span>
                                     ${r.videoUrl ? `<span class="video-indicator"><i class="fas fa-video"></i> Video</span>` : ''}
                                 </div>
-                                <span style="font-size:11px;color:var(--text-muted);">#${r.id}</span>
+                                ${sentStatus}
                             </div>
+                            ${!r.discordSent ? `<div style="margin-top:8px;text-align:right;"><button class="btn btn-sm retry-btn" data-id="${r.id}" style="color:var(--blue);border-color:var(--blue);"><i class="fas fa-redo"></i> Retry Discord</button></div>` : ''}
                         </div>
-                    `).join('');
+                    `}).join('');
 
+                    // Add click to open modal
                     grid.querySelectorAll('.report-card').forEach(card => {
-                        card.addEventListener('click', function() {
+                        card.addEventListener('click', function(e) {
+                            // Ignore if click is on a button
+                            if (e.target.closest('.retry-btn')) return;
                             const id = parseInt(this.dataset.id);
                             openModal(id);
+                        });
+                    });
+
+                    // Add retry button handlers
+                    grid.querySelectorAll('.retry-btn').forEach(btn => {
+                        btn.addEventListener('click', async function(e) {
+                            e.stopPropagation();
+                            const id = parseInt(this.dataset.id);
+                            const report = reports.find(r => r.id === id);
+                            if (!report) return;
+
+                            this.disabled = true;
+                            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+                            const result = await sendReportToDiscord(report);
+                            if (result.success) {
+                                report.discordSent = true;
+                                saveData();
+                                renderReports();
+                                showToast(`✅ Report #${id} sent to Discord!`, 'success');
+                            } else {
+                                showToast(`❌ Failed: ${result.error}`, 'error');
+                                this.disabled = false;
+                                this.innerHTML = '<i class="fas fa-redo"></i> Retry Discord';
+                            }
                         });
                     });
                 }
@@ -1117,9 +1180,11 @@
             const videoPlayer = document.getElementById('videoPlayer');
             const removeVideoBtn = document.getElementById('removeVideoBtn');
             const dropZone = document.getElementById('videoDropZone');
+            const submitBtn = document.getElementById('submitBtn');
 
             let currentVideoType = 'none';
             let currentVideoData = '';
+            let isSubmitting = false;
 
             function updateVideoPreview(type, data) {
                 currentVideoType = type;
@@ -1150,10 +1215,12 @@
                 if (!file) return;
                 if (!file.type.startsWith('video/')) {
                     showToast('Please select a valid video file.', 'error');
+                    this.value = '';
                     return;
                 }
                 if (file.size > 50 * 1024 * 1024) {
                     showToast('File too large (max 50MB).', 'error');
+                    this.value = '';
                     return;
                 }
                 const reader = new FileReader();
@@ -1202,6 +1269,10 @@
                 this.classList.remove('dragover');
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith('video/')) {
+                    if (file.size > 50 * 1024 * 1024) {
+                        showToast('File too large (max 50MB).', 'error');
+                        return;
+                    }
                     const reader = new FileReader();
                     reader.onload = function(ev) {
                         updateVideoPreview('file', ev.target.result);
@@ -1226,6 +1297,11 @@
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
 
+                if (isSubmitting) {
+                    showToast('Please wait, already submitting...', 'info');
+                    return;
+                }
+
                 const reporter = document.getElementById('reporterName').value.trim();
                 const reported = document.getElementById('reportedPlayer').value.trim();
                 const reason = document.getElementById('reasonSelect').value;
@@ -1246,29 +1322,43 @@
                     status: 'pending',
                     videoType: currentVideoType,
                     videoUrl: currentVideoData,
-                    createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString(),
+                    discordSent: false
                 };
 
-                // Send to Discord first
-                showToast('Sending report to Discord...', 'info');
-                const sent = await sendReportToDiscord(newReport);
+                isSubmitting = true;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
 
-                if (sent) {
-                    // Save locally only if Discord succeeded
-                    reports.push(newReport);
-                    saveData();
-                    renderReports();
+                try {
+                    const result = await sendReportToDiscord(newReport);
 
-                    form.reset();
-                    updateVideoPreview('none', '');
-                    videoFileInput.value = '';
-                    videoUrlInput.value = '';
+                    if (result.success) {
+                        newReport.discordSent = true;
+                        reports.push(newReport);
+                        saveData();
+                        renderReports();
 
-                    showToast(`Report #${newReport.id} submitted and sent to Discord!`, 'success');
-                    switchTab('reports');
-                } else {
-                    // If Discord failed, report is not saved locally
-                    showToast('Report was not saved. Please try again.', 'error');
+                        form.reset();
+                        updateVideoPreview('none', '');
+                        videoFileInput.value = '';
+                        videoUrlInput.value = '';
+
+                        showToast(`✅ Report #${newReport.id} submitted and sent to Discord!`, 'success');
+                        switchTab('reports');
+                    } else {
+                        newReport.discordSent = false;
+                        reports.push(newReport);
+                        saveData();
+                        renderReports();
+                        showToast(`⚠️ Report saved locally but Discord failed: ${result.error}. Use Retry button.`, 'error');
+                    }
+                } catch (error) {
+                    showToast(`❌ Error: ${error.message}`, 'error');
+                } finally {
+                    isSubmitting = false;
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Report';
                 }
             });
 
@@ -1361,7 +1451,7 @@
                     toast.style.transform = 'translateX(30px)';
                     toast.style.transition = '0.3s ease';
                     setTimeout(() => toast.remove(), 300);
-                }, 4000);
+                }, 5000);
             }
 
             // ============================
@@ -1369,7 +1459,9 @@
             // ============================
             loadData();
             renderReports();
-            console.log('🔍 Emergency Zilm Reports ready — sending to Discord webhook!');
+
+            console.log('🔍 Emergency Zilm Reports ready!');
+            console.log('Webhook URL configured:', WEBHOOK_URL);
         })();
     </script>
 
