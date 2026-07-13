@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Emergency Zilm Reports</title>
+    <title>Emergency Zilm - Report System</title>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -11,7 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
 
     <style>
-        /* --- RESET & BASE --- */
         * {
             margin: 0;
             padding: 0;
@@ -55,6 +54,102 @@
         ::-webkit-scrollbar-track { background: var(--bg-secondary); }
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 8px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent-dark); }
+
+        /* --- LOGIN MODAL --- */
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-overlay.show {
+            display: flex !important;
+        }
+        .login-box {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 48px 40px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .login-box .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .login-box .logo i {
+            color: var(--accent);
+            margin-right: 8px;
+        }
+        .login-box .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+        .login-box .form-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+        .login-box .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .login-box .form-group input {
+            width: 100%;
+            padding: 11px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .login-box .form-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+        }
+        .login-box .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .login-box .btn-primary:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+        }
+        .login-box .error {
+            color: var(--red);
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+        .login-box .error.show {
+            display: block;
+        }
 
         /* --- LAYOUT --- */
         .app-container {
@@ -119,6 +214,27 @@
             gap: 8px;
         }
         .game-name-badge i { font-size: 14px; }
+        .logout-btn {
+            background: var(--red);
+            color: #fff;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: none;
+        }
+        .logout-btn:hover {
+            background: #c82333;
+            transform: scale(1.02);
+        }
+        .logout-btn.show {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
 
         /* --- NAV TABS --- */
         .nav-tabs {
@@ -302,6 +418,17 @@
         }
         .video-preview .remove-video:hover { background: var(--red); transform: scale(1.05); }
 
+        .video-tips {
+            background: var(--blue-bg);
+            border: 1px solid var(--blue);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #004085;
+        }
+        .video-tips i { margin-right: 8px; }
+
         /* --- BUTTONS --- */
         .btn {
             display: inline-flex;
@@ -352,7 +479,7 @@
             flex-wrap: wrap;
         }
 
-        /* --- REPORTS LIST --- */
+        /* --- REPORTS LIST (ADMIN ONLY) --- */
         .reports-toolbar {
             display: flex;
             flex-wrap: wrap;
@@ -409,11 +536,11 @@
         }
         .reports-toolbar .filter-group select:focus { border-color: var(--accent); }
 
-        /* --- REPORT CARDS --- */
+        /* --- REPORT CARDS WITH FULL VIDEO --- */
         .reports-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 24px;
         }
         .report-card {
             background: var(--bg-card);
@@ -491,6 +618,34 @@
             margin-bottom: 12px;
             line-height: 1.5;
         }
+
+        /* --- FULL VIDEO PLAYER IN CARD --- */
+        .report-card .video-container {
+            width: 100%;
+            margin-bottom: 12px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: #000;
+            display: none;
+            position: relative;
+        }
+        .report-card .video-container.show {
+            display: block;
+        }
+        .report-card .video-container video,
+        .report-card .video-container iframe {
+            width: 100%;
+            max-height: 280px;
+            display: block;
+            background: #000;
+        }
+        .no-video {
+            color: var(--text-muted);
+            font-size: 13px;
+            padding: 12px 0;
+            text-align: center;
+            font-style: italic;
+        }
         .report-card .card-footer {
             display: flex;
             justify-content: space-between;
@@ -508,7 +663,10 @@
             gap: 12px;
         }
         .report-card .card-footer .meta i { margin-right: 3px; }
-        .report-card .card-footer .video-indicator { color: var(--accent); }
+        .report-card .card-footer .video-indicator {
+            color: var(--accent);
+            font-weight: 500;
+        }
         .report-card .card-footer .sent-status {
             font-size: 11px;
             font-weight: 600;
@@ -523,6 +681,26 @@
             background: var(--yellow-bg);
             color: #856404;
         }
+
+        .reports-locked {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+        .reports-locked i {
+            font-size: 64px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+        .reports-locked h2 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        .reports-locked .btn {
+            margin-top: 16px;
+        }
+
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
@@ -541,8 +719,8 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
             z-index: 1000;
             display: none;
             align-items: center;
@@ -564,10 +742,10 @@
             overflow-y: auto;
             padding: 32px 36px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
-            animation: slideUp 0.25s ease;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+            animation: slideUpModal 0.25s ease;
         }
-        @keyframes slideUp {
+        @keyframes slideUpModal {
             0% { opacity: 0; transform: translateY(20px) scale(0.98); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
@@ -621,7 +799,7 @@
         .modal-video video,
         .modal-video iframe {
             width: 100%;
-            max-height: 340px;
+            max-height: 400px;
             display: block;
         }
         .modal-actions {
@@ -674,30 +852,45 @@
             .reports-toolbar { flex-direction: column; align-items: stretch; }
             .reports-toolbar .filter-group { justify-content: stretch; }
             .reports-toolbar .filter-group select { flex: 1; }
+            .report-card .video-container video,
+            .report-card .video-container iframe {
+                max-height: 200px;
+            }
         }
         @media (max-width: 480px) {
             .app-container { padding: 0 12px 30px; }
             .modal-detail-row { flex-direction: column; gap: 2px; }
             .modal-detail-row .label { min-width: unset; }
         }
-
-        /* --- STORAGE WARNING --- */
-        .storage-warning {
-            background: var(--yellow-bg);
-            border: 1px solid var(--yellow);
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            margin-bottom: 16px;
-            display: none;
-            font-size: 13px;
-            color: #856404;
-        }
-        .storage-warning i {
-            margin-right: 8px;
-        }
     </style>
 </head>
 <body>
+
+    <!-- ============================================================ -->
+    <!-- LOGIN MODAL -->
+    <!-- ============================================================ -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i> Emergency Zilm
+            </div>
+            <p class="subtitle">Enter admin credentials to view reports</p>
+            <div id="loginForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUser" placeholder="Enter username" value="admin" />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPass" placeholder="Enter password" />
+                </div>
+                <button class="btn-primary" id="loginBtn" onclick="handleLogin()">
+                    <i class="fas fa-lock"></i> Login
+                </button>
+                <div class="error" id="loginError">❌ Invalid credentials. Try again.</div>
+            </div>
+        </div>
+    </div>
 
     <!-- ============================================================ -->
     <!-- APP -->
@@ -708,7 +901,7 @@
         <header class="app-header">
             <div class="logo">
                 <i class="fas fa-shield-alt"></i>
-                <span>Emergency Zilm <small>Reports</small></span>
+                <span>Emergency Zilm <small>Report System</small></span>
             </div>
             <div class="header-actions">
                 <span class="game-name-badge">
@@ -717,22 +910,25 @@
                 <span class="badge-total">
                     <i class="far fa-file-lines"></i> Total <strong id="totalReports">0</strong>
                 </span>
+                <button class="logout-btn" id="logoutBtn" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </div>
         </header>
 
         <!-- NAV TABS -->
         <div class="nav-tabs" role="tablist">
-            <button class="nav-tab active" data-tab="submit" role="tab">
+            <button class="nav-tab active" data-tab="submit" role="tab" onclick="switchTab('submit')">
                 <i class="fas fa-pen-to-square"></i> Submit Report
             </button>
-            <button class="nav-tab" data-tab="reports" role="tab">
+            <button class="nav-tab" data-tab="reports" role="tab" onclick="switchTab('reports')">
                 <i class="fas fa-list"></i> All Reports
                 <span class="count" id="reportCount">0</span>
             </button>
         </div>
 
         <!-- ============================================================ -->
-        <!-- PANEL: SUBMIT -->
+        <!-- PANEL: SUBMIT (PUBLIC - EVERYONE CAN SEE) -->
         <!-- ============================================================ -->
         <section class="panel active" id="panel-submit" role="tabpanel">
             <div class="submit-wrapper">
@@ -742,15 +938,16 @@
                     </div>
                     <p class="form-subtitle">
                         Provide details about the incident. All fields marked <span class="required">*</span> are required.
-                        Reports are sent directly to Discord as simple messages.
+                        Reports are sent to Discord and saved locally.
                     </p>
 
-                    <div class="storage-warning" id="storageWarning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span id="storageWarningText">Storage is getting full! Video files may not be saved permanently.</span>
+                    <div class="video-tips">
+                        <i class="fas fa-lightbulb"></i>
+                        <strong>💡 Video will be saved and shown in reports!</strong> 
+                        Upload MP4, WebM, or MOV files, or paste a YouTube URL.
                     </div>
 
-                    <form id="reportForm" novalidate>
+                    <form id="reportForm" onsubmit="return false;">
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Your Username <span class="required">*</span></label>
@@ -786,7 +983,7 @@
                             <div class="video-upload-area" id="videoDropZone">
                                 <i class="fas fa-video"></i>
                                 <p>Drop a video file or click to browse</p>
-                                <span class="hint">MP4, WebM, MOV · Max 50MB (or paste a YouTube URL below)</span>
+                                <span class="hint">MP4, WebM, MOV · Max 50MB</span>
                                 <input type="file" id="videoFileInput" accept="video/*" />
                             </div>
                             <div style="margin-top:10px;">
@@ -798,7 +995,7 @@
                                 />
                             </div>
                             <div class="video-preview" id="videoPreview">
-                                <button class="remove-video" id="removeVideoBtn" title="Remove video">
+                                <button class="remove-video" id="removeVideoBtn" onclick="removeVideo()" title="Remove video">
                                     <i class="fas fa-times"></i>
                                 </button>
                                 <div id="videoPlayer"></div>
@@ -809,10 +1006,10 @@
                         </div>
 
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <button type="button" class="btn btn-primary" onclick="submitReport()">
                                 <i class="fas fa-paper-plane"></i> Submit Report
                             </button>
-                            <button type="reset" class="btn" id="resetFormBtn">
+                            <button type="button" class="btn" onclick="resetForm()">
                                 <i class="fas fa-undo"></i> Clear
                             </button>
                         </div>
@@ -822,41 +1019,56 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- PANEL: REPORTS -->
+        <!-- PANEL: REPORTS (ADMIN ONLY - LOCKED) -->
         <!-- ============================================================ -->
         <section class="panel" id="panel-reports" role="tabpanel">
-
-            <div class="reports-toolbar">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchReports" placeholder="Search by player or reporter…" />
+            
+            <!-- Reports content (hidden until logged in) -->
+            <div id="reportsContent" style="display:none;">
+                <div class="reports-toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchReports" placeholder="Search by player or reporter…" oninput="renderReports()" />
+                    </div>
+                    <div class="filter-group">
+                        <select id="filterStatus" onchange="renderReports()">
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="reviewed">Reviewed</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <select id="filterReason" onchange="renderReports()">
+                            <option value="all">All Reasons</option>
+                            <option value="Exploiting / Hacking">Exploiting / Hacking</option>
+                            <option value="Harassment / Bullying">Harassment / Bullying</option>
+                            <option value="Inappropriate Content">Inappropriate Content</option>
+                            <option value="Scamming / Fraud">Scamming / Fraud</option>
+                            <option value="Team Griefing">Team Griefing</option>
+                            <option value="Chat Abuse">Chat Abuse</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <button class="btn btn-sm" onclick="clearFilters()">
+                            <i class="fas fa-eraser"></i> Clear
+                        </button>
+                    </div>
                 </div>
-                <div class="filter-group">
-                    <select id="filterStatus">
-                        <option value="all">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="reviewed">Reviewed</option>
-                        <option value="resolved">Resolved</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
-                    <select id="filterReason">
-                        <option value="all">All Reasons</option>
-                        <option value="Exploiting / Hacking">Exploiting / Hacking</option>
-                        <option value="Harassment / Bullying">Harassment / Bullying</option>
-                        <option value="Inappropriate Content">Inappropriate Content</option>
-                        <option value="Scamming / Fraud">Scamming / Fraud</option>
-                        <option value="Team Griefing">Team Griefing</option>
-                        <option value="Chat Abuse">Chat Abuse</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <button class="btn btn-sm" id="clearFiltersBtn">
-                        <i class="fas fa-eraser"></i> Clear
-                    </button>
+
+                <div class="reports-grid" id="reportsGrid">
+                    <!-- Rendered by JS -->
                 </div>
             </div>
 
-            <div class="reports-grid" id="reportsGrid">
-                <!-- Rendered by JS -->
+            <!-- Locked message (shown when not logged in) -->
+            <div id="reportsLocked">
+                <div class="reports-locked">
+                    <i class="fas fa-lock"></i>
+                    <h2>🔒 Reports are locked</h2>
+                    <p>You need to be an admin to view reports.</p>
+                    <button class="btn btn-primary" onclick="showLogin()">
+                        <i class="fas fa-unlock"></i> Login to View Reports
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -867,7 +1079,7 @@
     <!-- ============================================================ -->
     <div class="modal-overlay" id="detailModal">
         <div class="modal-content">
-            <button class="modal-close" id="modalCloseBtn">&times;</button>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
             <div class="modal-title" id="modalTitle">Report Details</div>
             <div class="modal-sub" id="modalSub">#<span id="modalId">—</span> · <span id="modalStatusBadge">—</span></div>
 
@@ -895,16 +1107,16 @@
             </div>
 
             <div class="modal-actions" id="modalActions">
-                <button class="btn btn-sm btn-success" data-action="resolved">
+                <button class="btn btn-sm btn-success" data-action="resolved" onclick="handleAction('resolved')">
                     <i class="fas fa-check"></i> Resolve
                 </button>
-                <button class="btn btn-sm" data-action="reviewed" style="border-color:var(--blue);color:var(--blue);">
+                <button class="btn btn-sm" data-action="reviewed" onclick="handleAction('reviewed')" style="border-color:var(--blue);color:var(--blue);">
                     <i class="fas fa-eye"></i> Mark Reviewed
                 </button>
-                <button class="btn btn-sm btn-danger" data-action="rejected">
+                <button class="btn btn-sm btn-danger" data-action="rejected" onclick="handleAction('rejected')">
                     <i class="fas fa-times"></i> Reject
                 </button>
-                <button class="btn btn-sm btn-danger" data-action="delete" style="background:transparent;border-color:var(--red);color:var(--red);margin-left:auto;">
+                <button class="btn btn-sm btn-danger" data-action="delete" onclick="handleAction('delete')" style="background:transparent;border-color:var(--red);color:var(--red);margin-left:auto;">
                     <i class="fas fa-trash-can"></i> Delete
                 </button>
             </div>
@@ -917,742 +1129,629 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT -->
+    <!-- JAVASCRIPT - ALL FUNCTIONS WITH INLINE ONCLICK -->
     <!-- ============================================================ -->
     <script>
-        (function() {
-            'use strict';
+        // ============================================================
+        // CONFIG
+        // ============================================================
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1526276290800521387/Z29013n485OYko_2jkR_YeHFKKmhybholdN-o3DKTMuzCn3QzWJHKyKtTix3Adughodg';
+        const ADMIN_USER = 'admin';
+        const ADMIN_PASS = 'emzdev';
+        const STORAGE_KEY = 'emergencyZilmReports';
 
-            // ============================
-            // CONFIG
-            // ============================
-            const WEBHOOK_URL = 'https://discord.com/api/webhooks/1526276290800521387/Z29013n485OYko_2jkR_YeHFKKmhybholdN-o3DKTMuzCn3QzWJHKyKtTix3Adughodg';
+        // ============================================================
+        // GLOBAL STATE
+        // ============================================================
+        let isLoggedIn = false;
+        let reports = [];
+        let nextId = 1;
+        let currentModalId = null;
+        let currentVideoType = 'none';
+        let currentVideoData = '';
+        let currentVideoName = '';
+        let currentVideoSize = 0;
+
+        // ============================================================
+        // LOGIN FUNCTIONS
+        // ============================================================
+        function handleLogin() {
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPass').value.trim();
             
-            // ============================
-            // STORAGE HELPER WITH QUOTA CHECK
-            // ============================
-            function checkStorageQuota() {
-                try {
-                    const testKey = '__storage_test__';
-                    localStorage.setItem(testKey, 'test');
-                    localStorage.removeItem(testKey);
-                    return { available: true };
-                } catch (e) {
-                    if (e.name === 'QuotaExceededError' || e.code === 22) {
-                        return { available: false, error: 'Storage quota exceeded' };
-                    }
-                    return { available: true };
-                }
+            if (username === ADMIN_USER && password === ADMIN_PASS) {
+                sessionStorage.setItem('ezAdminSession', 'true');
+                isLoggedIn = true;
+                document.getElementById('loginOverlay').classList.remove('show');
+                document.getElementById('logoutBtn').classList.add('show');
+                document.getElementById('reportsLocked').style.display = 'none';
+                document.getElementById('reportsContent').style.display = 'block';
+                document.getElementById('loginError').classList.remove('show');
+                loadData();
+                renderReports();
+                showToast('✅ Welcome, Admin!', 'success');
+            } else {
+                document.getElementById('loginError').classList.add('show');
             }
+        }
 
-            function safeSetItem(key, value) {
-                try {
-                    localStorage.setItem(key, value);
-                    return { success: true };
-                } catch (e) {
-                    if (e.name === 'QuotaExceededError' || e.code === 22) {
-                        return { success: false, error: 'Storage quota exceeded. Video files are not saved.' };
-                    }
-                    throw e;
-                }
-            }
+        function handleLogout() {
+            sessionStorage.removeItem('ezAdminSession');
+            isLoggedIn = false;
+            document.getElementById('logoutBtn').classList.remove('show');
+            document.getElementById('reportsLocked').style.display = 'block';
+            document.getElementById('reportsContent').style.display = 'none';
+            showToast('👋 Logged out successfully', 'info');
+        }
 
-            // ============================
-            // DATA LAYER (local storage) - FIXED: NO VIDEO DATA STORED
-            // ============================
-            const STORAGE_KEY = 'gameReportsData';
-            let reports = [];
-            let nextId = 1;
-            let currentModalId = null;
+        function showLogin() {
+            document.getElementById('loginOverlay').classList.add('show');
+            document.getElementById('loginUser').focus();
+        }
 
-            function loadData() {
-                try {
-                    const raw = localStorage.getItem(STORAGE_KEY);
-                    if (raw) {
-                        const parsed = JSON.parse(raw);
-                        // Filter out reports that might have video data (clean up)
-                        reports = (parsed.reports || []).map(r => {
-                            // Remove videoUrl if it's too large (data URL)
-                            if (r.videoUrl && r.videoUrl.startsWith('data:')) {
-                                r.videoUrl = '';
-                                r.videoType = 'none';
-                                r.videoFileName = r.videoFileName || 'Video (not saved)';
-                            }
-                            return r;
-                        });
-                        nextId = parsed.nextId || 1;
-                    } else {
-                        reports = [];
-                        nextId = 1;
-                    }
-                } catch (_) {
+        // Enter key support
+        document.getElementById('loginPass').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') handleLogin();
+        });
+        document.getElementById('loginUser').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') document.getElementById('loginPass').focus();
+        });
+
+        // Close login on outside click
+        document.getElementById('loginOverlay').addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('show');
+        });
+
+        // ============================================================
+        // DATA FUNCTIONS
+        // ============================================================
+        function loadData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    reports = parsed.reports || [];
+                    nextId = parsed.nextId || 1;
+                } else {
                     reports = [];
                     nextId = 1;
                 }
-                reports.forEach(r => { if (!r.id) r.id = nextId++; });
-                saveData();
+            } catch (_) {
+                reports = [];
+                nextId = 1;
             }
+            reports.forEach(r => {
+                if (!r.id) r.id = nextId++;
+            });
+        }
 
-            function saveData() {
-                // Clean data before saving - remove large video data
+        function saveData() {
+            try {
                 const cleanReports = reports.map(r => {
                     const clean = { ...r };
-                    // Don't store video data URLs in localStorage
-                    if (clean.videoUrl && clean.videoUrl.startsWith('data:')) {
+                    if (clean.videoUrl && clean.videoUrl.startsWith('data:') && clean.videoUrl.length > 500000) {
                         clean.videoUrl = '';
                         clean.videoType = 'none';
-                        clean.videoFileName = clean.videoFileName || 'Video (not saved)';
+                        clean.videoFileName = clean.videoFileName || 'Video (large file, not saved)';
                     }
                     return clean;
                 });
-                
-                const data = JSON.stringify({ reports: cleanReports, nextId });
-                const result = safeSetItem(STORAGE_KEY, data);
-                
-                if (!result.success) {
-                    showStorageWarning(true, result.error);
-                    // Try to save without any video data at all
-                    const emergencyData = JSON.stringify({ 
-                        reports: cleanReports.map(r => {
-                            const minimal = { ...r };
-                            delete minimal.videoUrl;
-                            delete minimal.videoType;
-                            delete minimal.videoFileName;
-                            delete minimal.videoSize;
-                            return minimal;
-                        }), 
-                        nextId 
-                    });
-                    try {
-                        localStorage.setItem(STORAGE_KEY, emergencyData);
-                    } catch (e) {
-                        console.error('Failed to save even minimal data:', e);
-                    }
-                } else {
-                    showStorageWarning(false);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ reports: cleanReports, nextId }));
+            } catch (e) {
+                console.warn('Storage quota exceeded:', e);
+            }
+        }
+
+        // ============================================================
+        // HELPERS
+        // ============================================================
+        function formatDate(iso) {
+            if (!iso) return '—';
+            try { return new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }); } catch (_) { return iso; }
+        }
+
+        function getStatusBadge(status) {
+            const map = {
+                pending: '<span class="badge-status pending"><span class="status-dot pending"></span>Pending</span>',
+                reviewed: '<span class="badge-status reviewed"><span class="status-dot reviewed"></span>Reviewed</span>',
+                resolved: '<span class="badge-status resolved"><span class="status-dot resolved"></span>Resolved</span>',
+                rejected: '<span class="badge-status rejected"><span class="status-dot rejected"></span>Rejected</span>',
+            };
+            return map[status] || map.pending;
+        }
+
+        function getStatusText(status) {
+            const map = { pending: 'Pending', reviewed: 'Reviewed', resolved: 'Resolved', rejected: 'Rejected' };
+            return map[status] || 'Pending';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getEmbedUrl(url) {
+            if (!url) return '';
+            if (url.includes('watch?v=')) {
+                const vid = url.split('v=')[1]?.split('&')[0];
+                if (vid) return `https://www.youtube.com/embed/${vid}`;
+            } else if (url.includes('youtu.be/')) {
+                const vid = url.split('youtu.be/')[1]?.split('?')[0];
+                if (vid) return `https://www.youtube.com/embed/${vid}`;
+            } else if (url.includes('youtube.com/embed/')) {
+                return url;
+            }
+            return url;
+        }
+
+        // ============================================================
+        // SEND TO DISCORD
+        // ============================================================
+        async function sendReportToDiscord(report) {
+            let message = `🚨 **NEW REPORT from Emergency Zilm**\n\n`;
+            message += `👤 **Reporter:** ${report.reporter}\n`;
+            message += `🎯 **Reported Player:** ${report.reported}\n`;
+            message += `📋 **Reason:** ${report.reason}\n`;
+            message += `📝 **Description:** ${report.description || 'No description provided.'}\n\n`;
+            
+            if (report.videoUrl) {
+                if (report.videoType === 'youtube') {
+                    message += `🎬 **Video Evidence:** ${report.videoUrl}\n`;
+                } else if (report.videoType === 'file') {
+                    const fileName = report.videoFileName || 'video.mp4';
+                    const fileSize = report.videoSize ? `${(report.videoSize / 1024).toFixed(1)}KB` : 'Unknown size';
+                    message += `🎬 **Video Attached:** ${fileName} (${fileSize})\n`;
                 }
+            } else {
+                message += `🎬 **Video Evidence:** No video attached\n`;
             }
+            
+            message += `\n🆔 **Report ID:** #${report.id}`;
+            message += `\n📊 **Status:** Pending`;
+            message += `\n🕐 **Reported at:** ${new Date().toISOString().replace('T', ' ').slice(0, 19)}`;
 
-            function showStorageWarning(show, message = '') {
-                const warning = document.getElementById('storageWarning');
-                const text = document.getElementById('storageWarningText');
-                if (show) {
-                    warning.style.display = 'block';
-                    text.textContent = message || '⚠️ Storage is full! Video files will NOT be saved. Only text reports will be stored.';
-                } else {
-                    warning.style.display = 'none';
-                }
-            }
-
-            // ============================
-            // HELPERS
-            // ============================
-            function formatDate(iso) {
-                if (!iso) return '—';
-                try { return new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }); } catch (_) { return iso; }
-            }
-
-            function getStatusBadge(status) {
-                const map = {
-                    pending: '<span class="badge-status pending"><span class="status-dot pending"></span>Pending</span>',
-                    reviewed: '<span class="badge-status reviewed"><span class="status-dot reviewed"></span>Reviewed</span>',
-                    resolved: '<span class="badge-status resolved"><span class="status-dot resolved"></span>Resolved</span>',
-                    rejected: '<span class="badge-status rejected"><span class="status-dot rejected"></span>Rejected</span>',
-                };
-                return map[status] || map.pending;
-            }
-
-            function getStatusText(status) {
-                const map = { pending: 'Pending', reviewed: 'Reviewed', resolved: 'Resolved', rejected: 'Rejected' };
-                return map[status] || 'Pending';
-            }
-
-            function escapeHtml(text) {
-                if (!text) return '';
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            // ============================
-            // SEND TO DISCORD - SIMPLE TEXT MESSAGE
-            // ============================
-            async function sendReportToDiscord(report) {
-                let message = `🚨 **NEW REPORT from Emergency Zilm**\n\n`;
-                message += `👤 **Reporter:** ${report.reporter}\n`;
-                message += `🎯 **Reported Player:** ${report.reported}\n`;
-                message += `📋 **Reason:** ${report.reason}\n`;
-                message += `📝 **Description:** ${report.description || 'No description provided.'}\n\n`;
-                
-                if (report.videoUrl) {
-                    if (report.videoType === 'youtube') {
-                        message += `🎬 **Video Evidence:** ${report.videoUrl}\n`;
-                    } else if (report.videoType === 'file') {
-                        const fileName = report.videoFileName || 'video.mp4';
-                        const fileSize = report.videoSize ? `${(report.videoSize / 1024).toFixed(1)}KB` : 'Unknown size';
-                        message += `🎬 **Video Attached:** ${fileName} (${fileSize}) - View in the report dashboard\n`;
-                    }
-                } else {
-                    message += `🎬 **Video Evidence:** No video attached\n`;
-                }
-                
-                message += `\n🆔 **Report ID:** #${report.id}`;
-                message += `\n📊 **Status:** Pending`;
-                message += `\n🕐 **Reported at:** ${new Date().toISOString().replace('T', ' ').slice(0, 19)}`;
-
-                try {
-                    const response = await fetch(WEBHOOK_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ content: message })
-                    });
-
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`Discord returned ${response.status}: ${errorText}`);
-                    }
-
-                    return { success: true, status: response.status };
-                } catch (error) {
-                    console.error('Failed to send to Discord:', error);
-                    return { success: false, error: error.message };
-                }
-            }
-
-            // ============================
-            // RENDER REPORTS
-            // ============================
-            function renderReports() {
-                const grid = document.getElementById('reportsGrid');
-                const search = document.getElementById('searchReports').value.toLowerCase().trim();
-                const statusFilter = document.getElementById('filterStatus').value;
-                const reasonFilter = document.getElementById('filterReason').value;
-
-                let filtered = reports.filter(r => {
-                    const matchSearch = r.reporter.toLowerCase().includes(search) ||
-                        r.reported.toLowerCase().includes(search);
-                    const matchStatus = statusFilter === 'all' || r.status === statusFilter;
-                    const matchReason = reasonFilter === 'all' || r.reason === reasonFilter;
-                    return matchSearch && matchStatus && matchReason;
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: message })
                 });
-
-                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-                if (filtered.length === 0) {
-                    grid.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-inbox"></i>
-                            <h3>No reports found</h3>
-                            <p>${reports.length === 0 ? 'Submit your first report using the form above.' : 'Try adjusting your filters.'}</p>
-                        </div>
-                    `;
-                } else {
-                    grid.innerHTML = filtered.map(r => {
-                        const sentStatus = r.discordSent ?
-                            '<span class="sent-status sent"><i class="fas fa-check-circle"></i> Sent to Discord</span>' :
-                            '<span class="sent-status pending"><i class="fas fa-clock"></i> Pending send</span>';
-
-                        const hasVideo = r.videoFileName && !r.videoFileName.includes('not saved');
-                        const videoLabel = hasVideo ? r.videoFileName : (r.videoUrl && !r.videoUrl.startsWith('data:') ? 'Video' : '');
-
-                        return `
-                        <div class="report-card" data-id="${r.id}">
-                            <div class="card-header">
-                                <div class="players">
-                                    <span class="reporter">${escapeHtml(r.reporter)}</span>
-                                    <span class="arrow"><i class="fas fa-arrow-right"></i></span>
-                                    <span class="reported">${escapeHtml(r.reported)}</span>
-                                </div>
-                                ${getStatusBadge(r.status)}
-                            </div>
-                            <div class="card-reason">
-                                <strong>${escapeHtml(r.reason)}</strong>
-                            </div>
-                            <div class="card-desc">${escapeHtml(r.description)}</div>
-                            <div class="card-footer">
-                                <div class="meta">
-                                    <span><i class="far fa-calendar"></i> ${formatDate(r.createdAt)}</span>
-                                    ${videoLabel ? `<span class="video-indicator"><i class="fas fa-video"></i> ${escapeHtml(videoLabel)}</span>` : ''}
-                                    ${!r.videoUrl && r.videoFileName && r.videoFileName.includes('not saved') ? `<span style="color:var(--orange);font-size:11px;">⚠️ Video not saved</span>` : ''}
-                                </div>
-                                ${sentStatus}
-                            </div>
-                            ${!r.discordSent ? `<div style="margin-top:8px;text-align:right;"><button class="btn btn-sm retry-btn" data-id="${r.id}" style="color:var(--blue);border-color:var(--blue);"><i class="fas fa-redo"></i> Retry Discord</button></div>` : ''}
-                        </div>
-                    `}).join('');
-
-                    grid.querySelectorAll('.report-card').forEach(card => {
-                        card.addEventListener('click', function(e) {
-                            if (e.target.closest('.retry-btn')) return;
-                            const id = parseInt(this.dataset.id);
-                            openModal(id);
-                        });
-                    });
-
-                    grid.querySelectorAll('.retry-btn').forEach(btn => {
-                        btn.addEventListener('click', async function(e) {
-                            e.stopPropagation();
-                            const id = parseInt(this.dataset.id);
-                            const report = reports.find(r => r.id === id);
-                            if (!report) return;
-
-                            this.disabled = true;
-                            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-                            const result = await sendReportToDiscord(report);
-                            if (result.success) {
-                                report.discordSent = true;
-                                saveData();
-                                renderReports();
-                                showToast(`✅ Report #${id} sent to Discord!`, 'success');
-                            } else {
-                                showToast(`❌ Failed: ${result.error}`, 'error');
-                                this.disabled = false;
-                                this.innerHTML = '<i class="fas fa-redo"></i> Retry Discord';
-                            }
-                        });
-                    });
+                if (!response.ok) {
+                    throw new Error(`Discord returned ${response.status}`);
                 }
-
-                document.getElementById('totalReports').textContent = reports.length;
-                document.getElementById('reportCount').textContent = reports.length;
+                return { success: true };
+            } catch (error) {
+                console.error('Discord send failed:', error);
+                return { success: false, error: error.message };
             }
+        }
 
-            // ============================
-            // MODAL
-            // ============================
-            function openModal(id) {
-                const r = reports.find(x => x.id === id);
-                if (!r) return;
-                currentModalId = id;
+        // ============================================================
+        // RENDER REPORTS
+        // ============================================================
+        function renderReports() {
+            if (!isLoggedIn) return;
 
-                const modal = document.getElementById('detailModal');
-                document.getElementById('modalId').textContent = r.id;
-                document.getElementById('modalReporter').textContent = r.reporter || '—';
-                document.getElementById('modalReported').textContent = r.reported || '—';
-                document.getElementById('modalReason').textContent = r.reason || '—';
-                document.getElementById('modalDesc').textContent = r.description || '—';
-                document.getElementById('modalStatusBadge').innerHTML = getStatusBadge(r.status);
-                document.getElementById('modalTitle').textContent = `Report #${r.id}`;
-                document.getElementById('modalSub').innerHTML =
-                    `#${r.id} · ${getStatusBadge(r.status)} · ${formatDate(r.createdAt)}`;
+            const grid = document.getElementById('reportsGrid');
+            const search = document.getElementById('searchReports').value.toLowerCase().trim();
+            const statusFilter = document.getElementById('filterStatus').value;
+            const reasonFilter = document.getElementById('filterReason').value;
 
-                const videoContainer = document.getElementById('modalVideoContainer');
-                const player = document.getElementById('modalVideoPlayer');
-                // Only show video if we have a valid URL that's not a data URL
-                if (r.videoUrl && r.videoType === 'youtube') {
-                    videoContainer.style.display = 'block';
-                    let embed = r.videoUrl;
-                    if (r.videoUrl.includes('watch?v=')) {
-                        const vid = r.videoUrl.split('v=')[1]?.split('&')[0];
-                        if (vid) embed = `https://www.youtube.com/embed/${vid}`;
-                    } else if (r.videoUrl.includes('youtu.be/')) {
-                        const vid = r.videoUrl.split('youtu.be/')[1]?.split('?')[0];
-                        if (vid) embed = `https://www.youtube.com/embed/${vid}`;
+            let filtered = reports.filter(r => {
+                const matchSearch = (r.reporter || '').toLowerCase().includes(search) ||
+                    (r.reported || '').toLowerCase().includes(search);
+                const matchStatus = statusFilter === 'all' || r.status === statusFilter;
+                const matchReason = reasonFilter === 'all' || r.reason === reasonFilter;
+                return matchSearch && matchStatus && matchReason;
+            });
+
+            filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No reports found</h3>
+                        <p>${reports.length === 0 ? 'Submit your first report using the form above.' : 'Try adjusting your filters.'}</p>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = filtered.map(r => {
+                    const sentStatus = r.discordSent ?
+                        '<span class="sent-status sent"><i class="fas fa-check-circle"></i> Sent to Discord</span>' :
+                        '<span class="sent-status pending"><i class="fas fa-clock"></i> Pending send</span>';
+
+                    let videoHTML = '';
+                    let hasVideo = false;
+                    
+                    if (r.videoUrl && r.videoType === 'youtube') {
+                        const embed = getEmbedUrl(r.videoUrl);
+                        videoHTML = `<iframe src="${embed}" frameborder="0" allowfullscreen></iframe>`;
+                        hasVideo = true;
+                    } else if (r.videoUrl && r.videoType === 'file') {
+                        videoHTML = `<video controls src="${r.videoUrl}" preload="metadata"></video>`;
+                        hasVideo = true;
                     }
-                    player.innerHTML = `<iframe src="${embed}" frameborder="0" allowfullscreen style="width:100%;height:300px;"></iframe>`;
-                } else {
-                    videoContainer.style.display = 'none';
-                    player.innerHTML = '';
-                }
 
-                document.querySelectorAll('#modalActions [data-action]').forEach(btn => {
-                    btn.dataset.reportId = r.id;
-                });
-
-                modal.classList.add('open');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeModal() {
-                document.getElementById('detailModal').classList.remove('open');
-                document.body.style.overflow = '';
-                currentModalId = null;
-            }
-
-            // ============================
-            // FORM HANDLING
-            // ============================
-            const form = document.getElementById('reportForm');
-            const videoFileInput = document.getElementById('videoFileInput');
-            const videoUrlInput = document.getElementById('videoUrlInput');
-            const videoPreview = document.getElementById('videoPreview');
-            const videoPlayer = document.getElementById('videoPlayer');
-            const removeVideoBtn = document.getElementById('removeVideoBtn');
-            const dropZone = document.getElementById('videoDropZone');
-            const submitBtn = document.getElementById('submitBtn');
-            const videoInfo = document.getElementById('videoInfo');
-            const videoInfoText = document.getElementById('videoInfoText');
-
-            let currentVideoType = 'none';
-            let currentVideoData = '';
-            let currentVideoFile = null;
-            let currentVideoName = '';
-            let currentVideoSize = 0;
-            let isSubmitting = false;
-
-            function updateVideoPreview(type, data, file = null) {
-                currentVideoType = type;
-                currentVideoData = data;
-                currentVideoFile = file;
-
-                if (!data) {
-                    videoPreview.classList.remove('show');
-                    videoPlayer.innerHTML = '';
-                    videoInfo.style.display = 'none';
-                    return;
-                }
-
-                videoPreview.classList.add('show');
-
-                if (type === 'youtube') {
-                    let embed = data;
-                    if (data.includes('watch?v=')) {
-                        const vid = data.split('v=')[1]?.split('&')[0];
-                        if (vid) embed = `https://www.youtube.com/embed/${vid}`;
-                    } else if (data.includes('youtu.be/')) {
-                        const vid = data.split('youtu.be/')[1]?.split('?')[0];
-                        if (vid) embed = `https://www.youtube.com/embed/${vid}`;
-                    }
-                    videoPlayer.innerHTML = `<iframe src="${embed}" frameborder="0" allowfullscreen style="width:100%;height:220px;"></iframe>`;
-                    videoInfo.style.display = 'block';
-                    videoInfoText.innerHTML = `✅ YouTube video: <a href="${data}" target="_blank">${data}</a>`;
-                    videoInfoText.style.color = 'var(--green)';
-                } else if (type === 'file') {
-                    videoPlayer.innerHTML = `<video controls src="${data}" style="width:100%;max-height:220px;"></video>`;
-                    if (file) {
-                        currentVideoName = file.name;
-                        currentVideoSize = file.size;
-                        const extension = file.name.split('.').pop().toLowerCase();
-                        const isMP4 = extension === 'mp4';
-                        videoInfo.style.display = 'block';
+                    return `
+                    <div class="report-card" onclick="openModal(${r.id})">
+                        <div class="card-header">
+                            <div class="players">
+                                <span class="reporter">${escapeHtml(r.reporter)}</span>
+                                <span class="arrow"><i class="fas fa-arrow-right"></i></span>
+                                <span class="reported">${escapeHtml(r.reported)}</span>
+                            </div>
+                            ${getStatusBadge(r.status)}
+                        </div>
+                        <div class="card-reason">
+                            <strong>${escapeHtml(r.reason)}</strong>
+                        </div>
+                        <div class="card-desc">${escapeHtml(r.description)}</div>
                         
-                        // Check if storage has space
-                        const storageCheck = checkStorageQuota();
-                        if (!storageCheck.available) {
-                            videoInfoText.innerHTML = `
-                                ⚠️ <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB) - 
-                                ❌ STORAGE FULL! Video will NOT be saved to your report history.
-                                It will still be sent to Discord.
-                            `;
-                            videoInfoText.style.color = 'var(--orange)';
-                        } else {
-                            videoInfoText.innerHTML = `
-                                📹 File: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB) 
-                                ${isMP4 ? '✅ MP4 format - Good!' : '⚠️ Not MP4 - Discord may not play it directly'}
-                                ${(file.size / 1024 / 1024) > 2 ? ' ⚠️ Large file - may fill storage!' : ''}
-                            `;
-                            videoInfoText.style.color = isMP4 ? 'var(--green)' : 'var(--orange)';
-                        }
-                    }
-                }
+                        ${hasVideo ? `<div class="video-container show">${videoHTML}</div>` : `<div class="no-video">📹 No video attached</div>`}
+                        
+                        <div class="card-footer">
+                            <div class="meta">
+                                <span><i class="far fa-calendar"></i> ${formatDate(r.createdAt)}</span>
+                                ${hasVideo ? `<span class="video-indicator"><i class="fas fa-video"></i> Video</span>` : ''}
+                            </div>
+                            ${sentStatus}
+                        </div>
+                        ${!r.discordSent ? `<div style="margin-top:8px;text-align:right;"><button class="btn btn-sm retry-btn" onclick="event.stopPropagation();retryDiscord(${r.id})" style="color:var(--blue);border-color:var(--blue);"><i class="fas fa-redo"></i> Retry Discord</button></div>` : ''}
+                    </div>
+                `}).join('');
             }
 
-            videoFileInput.addEventListener('change', function(e) {
-                const file = this.files[0];
-                if (!file) return;
-                if (!file.type.startsWith('video/')) {
-                    showToast('Please select a valid video file.', 'error');
-                    this.value = '';
-                    return;
+            document.getElementById('totalReports').textContent = reports.length;
+            document.getElementById('reportCount').textContent = reports.length;
+        }
+
+        // ============================================================
+        // RETRY DISCORD
+        // ============================================================
+        async function retryDiscord(id) {
+            const report = reports.find(r => r.id === id);
+            if (!report) return;
+
+            const result = await sendReportToDiscord(report);
+            if (result.success) {
+                report.discordSent = true;
+                saveData();
+                renderReports();
+                showToast(`✅ Report #${id} sent to Discord!`, 'success');
+            } else {
+                showToast(`❌ Failed: ${result.error}`, 'error');
+            }
+        }
+
+        // ============================================================
+        // MODAL
+        // ============================================================
+        function openModal(id) {
+            if (!isLoggedIn) return;
+            const r = reports.find(x => x.id === id);
+            if (!r) return;
+            currentModalId = id;
+
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalId').textContent = r.id;
+            document.getElementById('modalReporter').textContent = r.reporter || '—';
+            document.getElementById('modalReported').textContent = r.reported || '—';
+            document.getElementById('modalReason').textContent = r.reason || '—';
+            document.getElementById('modalDesc').textContent = r.description || '—';
+            document.getElementById('modalStatusBadge').innerHTML = getStatusBadge(r.status);
+            document.getElementById('modalTitle').textContent = `Report #${r.id}`;
+            document.getElementById('modalSub').innerHTML = `#${r.id} · ${getStatusBadge(r.status)} · ${formatDate(r.createdAt)}`;
+
+            const videoContainer = document.getElementById('modalVideoContainer');
+            const player = document.getElementById('modalVideoPlayer');
+            
+            if (r.videoUrl && r.videoType === 'youtube') {
+                videoContainer.style.display = 'block';
+                const embed = getEmbedUrl(r.videoUrl);
+                player.innerHTML = `<iframe src="${embed}" frameborder="0" allowfullscreen style="width:100%;height:400px;"></iframe>`;
+            } else if (r.videoUrl && r.videoType === 'file') {
+                videoContainer.style.display = 'block';
+                player.innerHTML = `<video controls src="${r.videoUrl}" style="width:100%;max-height:400px;"></video>`;
+            } else {
+                videoContainer.style.display = 'none';
+                player.innerHTML = '';
+            }
+
+            document.querySelectorAll('#modalActions [data-action]').forEach(btn => {
+                btn.dataset.reportId = r.id;
+            });
+
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('open');
+            document.body.style.overflow = '';
+            currentModalId = null;
+        }
+
+        // ============================================================
+        // MODAL ACTIONS
+        // ============================================================
+        function handleAction(action) {
+            if (!isLoggedIn) return;
+            const id = currentModalId;
+            if (!id) return;
+
+            const report = reports.find(r => r.id === id);
+            if (!report) return;
+
+            if (action === 'delete') {
+                if (!confirm(`Delete report #${id}? This cannot be undone.`)) return;
+                reports = reports.filter(r => r.id !== id);
+                saveData();
+                closeModal();
+                renderReports();
+                showToast(`Report #${id} deleted.`, 'info');
+                return;
+            }
+
+            if (action === 'resolved' || action === 'reviewed' || action === 'rejected') {
+                report.status = action;
+                saveData();
+                closeModal();
+                renderReports();
+                showToast(`Report #${id} marked as ${getStatusText(action)}.`, 'success');
+            }
+        }
+
+        // ============================================================
+        // FORM FUNCTIONS
+        // ============================================================
+        function updateVideoPreview(type, data, file = null) {
+            currentVideoType = type;
+            currentVideoData = data;
+
+            if (!data) {
+                document.getElementById('videoPreview').classList.remove('show');
+                document.getElementById('videoPlayer').innerHTML = '';
+                document.getElementById('videoInfo').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('videoPreview').classList.add('show');
+
+            if (type === 'youtube') {
+                const embed = getEmbedUrl(data);
+                document.getElementById('videoPlayer').innerHTML = `<iframe src="${embed}" frameborder="0" allowfullscreen style="width:100%;height:220px;"></iframe>`;
+                document.getElementById('videoInfo').style.display = 'block';
+                document.getElementById('videoInfoText').innerHTML = `✅ YouTube video: <a href="${data}" target="_blank">${data}</a>`;
+                document.getElementById('videoInfoText').style.color = 'var(--green)';
+            } else if (type === 'file' && file) {
+                document.getElementById('videoPlayer').innerHTML = `<video controls src="${data}" style="width:100%;max-height:220px;"></video>`;
+                currentVideoName = file.name;
+                currentVideoSize = file.size;
+                const extension = file.name.split('.').pop().toLowerCase();
+                const isMP4 = extension === 'mp4';
+                document.getElementById('videoInfo').style.display = 'block';
+                document.getElementById('videoInfoText').innerHTML = `
+                    📹 File: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB) 
+                    ${isMP4 ? '✅ MP4 format' : `⚠️ ${extension.toUpperCase()} format`}
+                `;
+                document.getElementById('videoInfoText').style.color = isMP4 ? 'var(--green)' : 'var(--orange)';
+            }
+        }
+
+        function removeVideo() {
+            updateVideoPreview('none', '');
+            document.getElementById('videoFileInput').value = '';
+            document.getElementById('videoUrlInput').value = '';
+            document.getElementById('videoInfo').style.display = 'none';
+            showToast('Video removed.', 'info');
+        }
+
+        function resetForm() {
+            document.getElementById('reportForm').reset();
+            removeVideo();
+            showToast('Form cleared.', 'info');
+        }
+
+        async function submitReport() {
+            const reporter = document.getElementById('reporterName').value.trim();
+            const reported = document.getElementById('reportedPlayer').value.trim();
+            const reason = document.getElementById('reasonSelect').value;
+            const desc = document.getElementById('reportDesc').value.trim();
+
+            if (!reporter || !reported || !reason || !desc) {
+                showToast('Please fill in all required fields.', 'error');
+                return;
+            }
+
+            const newReport = {
+                id: nextId++,
+                reporter,
+                reported,
+                reason,
+                description: desc,
+                status: 'pending',
+                videoType: currentVideoType,
+                videoUrl: currentVideoData,
+                videoFileName: currentVideoName,
+                videoSize: currentVideoSize,
+                createdAt: new Date().toISOString(),
+                discordSent: false
+            };
+
+            const submitBtn = document.querySelector('#panel-submit .btn-primary');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                const result = await sendReportToDiscord(newReport);
+                if (result.success) newReport.discordSent = true;
+
+                reports.push(newReport);
+                saveData();
+                renderReports();
+
+                resetForm();
+                showToast(`✅ Report #${newReport.id} saved${result.success ? ' and sent to Discord!' : '! Discord send failed, will retry later.'}`, 
+                    result.success ? 'success' : 'info');
+            } catch (error) {
+                showToast(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Report';
+            }
+        }
+
+        // ============================================================
+        // VIDEO INPUT HANDLING
+        // ============================================================
+        document.getElementById('videoFileInput').addEventListener('change', function(e) {
+            const file = this.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('video/')) {
+                showToast('Please select a valid video file.', 'error');
+                this.value = '';
+                return;
+            }
+            if (file.size > 50 * 1024 * 1024) {
+                showToast('File too large (max 50MB).', 'error');
+                this.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const dataUrl = ev.target.result;
+                updateVideoPreview('file', dataUrl, file);
+                document.getElementById('videoUrlInput').value = '';
+                showToast('Video attached!', 'success');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('videoUrlInput').addEventListener('input', function() {
+            const val = this.value.trim();
+            if (val) {
+                if (val.startsWith('http://') || val.startsWith('https://')) {
+                    updateVideoPreview('youtube', val);
+                    document.getElementById('videoFileInput').value = '';
+                } else {
+                    updateVideoPreview('youtube', val);
                 }
+            } else {
+                if (currentVideoType === 'youtube') {
+                    updateVideoPreview('none', '');
+                }
+            }
+        });
+
+        // Drag and drop
+        const dropZone = document.getElementById('videoDropZone');
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('video/')) {
                 if (file.size > 50 * 1024 * 1024) {
                     showToast('File too large (max 50MB).', 'error');
-                    this.value = '';
                     return;
                 }
-
                 const reader = new FileReader();
                 reader.onload = function(ev) {
                     const dataUrl = ev.target.result;
                     updateVideoPreview('file', dataUrl, file);
-                    videoUrlInput.value = '';
-                    showToast('Video attached! It will be sent to Discord but may not be saved locally if too large.', 'info');
+                    document.getElementById('videoUrlInput').value = '';
+                    showToast('Video attached!', 'success');
                 };
                 reader.readAsDataURL(file);
-            });
-
-            videoUrlInput.addEventListener('input', function() {
-                const val = this.value.trim();
-                if (val) {
-                    if (val.startsWith('http://') || val.startsWith('https://')) {
-                        updateVideoPreview('youtube', val);
-                        videoFileInput.value = '';
-                    } else {
-                        updateVideoPreview('youtube', val);
-                    }
-                } else {
-                    if (currentVideoType === 'youtube') {
-                        updateVideoPreview('none', '');
-                    }
-                }
-            });
-
-            removeVideoBtn.addEventListener('click', function() {
-                updateVideoPreview('none', '');
-                videoFileInput.value = '';
-                videoUrlInput.value = '';
-                videoInfo.style.display = 'none';
-                showToast('Video removed.', 'info');
-            });
-
-            dropZone.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.classList.add('dragover');
-            });
-            dropZone.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                this.classList.remove('dragover');
-            });
-            dropZone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.classList.remove('dragover');
-                const file = e.dataTransfer.files[0];
-                if (file && file.type.startsWith('video/')) {
-                    if (file.size > 50 * 1024 * 1024) {
-                        showToast('File too large (max 50MB).', 'error');
-                        return;
-                    }
-                    const reader = new FileReader();
-                    reader.onload = function(ev) {
-                        const dataUrl = ev.target.result;
-                        updateVideoPreview('file', dataUrl, file);
-                        videoUrlInput.value = '';
-                        showToast('Video attached!', 'success');
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    showToast('Please drop a video file.', 'error');
-                }
-            });
-
-            document.getElementById('resetFormBtn').addEventListener('click', function(e) {
-                e.preventDefault();
-                form.reset();
-                updateVideoPreview('none', '');
-                videoFileInput.value = '';
-                videoUrlInput.value = '';
-                videoInfo.style.display = 'none';
-                showToast('Form cleared.', 'info');
-            });
-
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                if (isSubmitting) {
-                    showToast('Please wait, already submitting...', 'info');
-                    return;
-                }
-
-                const reporter = document.getElementById('reporterName').value.trim();
-                const reported = document.getElementById('reportedPlayer').value.trim();
-                const reason = document.getElementById('reasonSelect').value;
-                const desc = document.getElementById('reportDesc').value.trim();
-
-                if (!reporter || !reported || !reason || !desc) {
-                    showToast('Please fill in all required fields.', 'error');
-                    return;
-                }
-
-                // Check storage before saving
-                const storageCheck = checkStorageQuota();
-                const canSaveVideo = storageCheck.available && currentVideoData && !currentVideoData.startsWith('data:');
-
-                // For file uploads, we keep the video data only for the Discord send
-                // but we DON'T save it to localStorage
-                let videoUrlToSave = '';
-                let videoTypeToSave = 'none';
-                let videoNameToSave = '';
-                let videoSizeToSave = 0;
-
-                if (currentVideoType === 'youtube') {
-                    videoUrlToSave = currentVideoData;
-                    videoTypeToSave = 'youtube';
-                } else if (currentVideoType === 'file') {
-                    // Only save video info, not the actual data
-                    videoNameToSave = currentVideoName;
-                    videoSizeToSave = currentVideoSize;
-                    videoTypeToSave = 'file';
-                    // For Discord, we'll use the data URL directly
-                    videoUrlToSave = currentVideoData; // This is the data URL for Discord
-                }
-
-                const newReport = {
-                    id: nextId++,
-                    reporter,
-                    reported,
-                    server: 'Emergency Zilm',
-                    reason,
-                    description: desc,
-                    status: 'pending',
-                    videoType: videoTypeToSave,
-                    videoUrl: videoUrlToSave, // This may be a data URL temporarily
-                    videoFileName: videoNameToSave,
-                    videoSize: videoSizeToSave,
-                    createdAt: new Date().toISOString(),
-                    discordSent: false,
-                    videoSaved: canSaveVideo
-                };
-
-                isSubmitting = true;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-                try {
-                    // Send to Discord first
-                    const result = await sendReportToDiscord(newReport);
-
-                    // After Discord, clean the video data before saving to localStorage
-                    const reportToSave = { ...newReport };
-                    // Remove data URL if it exists
-                    if (reportToSave.videoUrl && reportToSave.videoUrl.startsWith('data:')) {
-                        reportToSave.videoUrl = '';
-                        reportToSave.videoType = 'none';
-                        reportToSave.videoFileName = reportToSave.videoFileName || 'Video (not saved)';
-                        reportToSave.videoSaved = false;
-                    }
-
-                    if (result.success) {
-                        reportToSave.discordSent = true;
-                        reports.push(reportToSave);
-                        saveData();
-                        renderReports();
-
-                        form.reset();
-                        updateVideoPreview('none', '');
-                        videoFileInput.value = '';
-                        videoUrlInput.value = '';
-                        videoInfo.style.display = 'none';
-
-                        showToast(`✅ Report #${newReport.id} submitted and sent to Discord!`, 'success');
-                        switchTab('reports');
-                    } else {
-                        reportToSave.discordSent = false;
-                        reports.push(reportToSave);
-                        saveData();
-                        renderReports();
-                        showToast(`⚠️ Report saved locally but Discord failed: ${result.error}. Use Retry button.`, 'error');
-                    }
-                } catch (error) {
-                    showToast(`❌ Error: ${error.message}`, 'error');
-                } finally {
-                    isSubmitting = false;
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Report';
-                }
-            });
-
-            // ============================
-            // TAB SWITCHING
-            // ============================
-            function switchTab(tabId) {
-                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-                document.getElementById(`panel-${tabId}`).classList.add('active');
-                document.querySelector(`.nav-tab[data-tab="${tabId}"]`).classList.add('active');
-                if (tabId === 'reports') renderReports();
+            } else {
+                showToast('Please drop a video file.', 'error');
             }
+        });
 
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    switchTab(this.dataset.tab);
-                });
-            });
-
-            // ============================
-            // FILTERS & SEARCH
-            // ============================
-            document.getElementById('searchReports').addEventListener('input', renderReports);
-            document.getElementById('filterStatus').addEventListener('change', renderReports);
-            document.getElementById('filterReason').addEventListener('change', renderReports);
-
-            document.getElementById('clearFiltersBtn').addEventListener('click', function() {
-                document.getElementById('searchReports').value = '';
-                document.getElementById('filterStatus').value = 'all';
-                document.getElementById('filterReason').value = 'all';
+        // ============================================================
+        // TAB SWITCHING
+        // ============================================================
+        function switchTab(tabId) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`panel-${tabId}`).classList.add('active');
+            document.querySelector(`.nav-tab[data-tab="${tabId}"]`).classList.add('active');
+            if (tabId === 'reports' && isLoggedIn) {
                 renderReports();
-                showToast('Filters cleared.', 'info');
-            });
-
-            // ============================
-            // MODAL ACTIONS
-            // ============================
-            document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
-            document.getElementById('detailModal').addEventListener('click', function(e) {
-                if (e.target === this) closeModal();
-            });
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') closeModal();
-            });
-
-            document.getElementById('modalActions').addEventListener('click', function(e) {
-                const btn = e.target.closest('[data-action]');
-                if (!btn) return;
-                const action = btn.dataset.action;
-                const id = parseInt(btn.dataset.reportId);
-                if (!id) return;
-
-                const report = reports.find(r => r.id === id);
-                if (!report) return;
-
-                if (action === 'delete') {
-                    if (!confirm(`Delete report #${id}? This cannot be undone.`)) return;
-                    reports = reports.filter(r => r.id !== id);
-                    saveData();
-                    closeModal();
-                    renderReports();
-                    showToast(`Report #${id} deleted.`, 'info');
-                    return;
-                }
-
-                if (action === 'resolved' || action === 'reviewed' || action === 'rejected') {
-                    report.status = action;
-                    saveData();
-                    closeModal();
-                    renderReports();
-                    showToast(`Report #${id} marked as ${getStatusText(action)}.`, 'success');
-                }
-            });
-
-            // ============================
-            // TOAST SYSTEM
-            // ============================
-            function showToast(message, type = 'info') {
-                const container = document.getElementById('toastContainer');
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                const icon = type === 'success' ? 'fa-check-circle' :
-                    type === 'error' ? 'fa-exclamation-circle' :
-                    'fa-info-circle';
-                toast.innerHTML = `<i class="fas ${icon}" style="font-size:18px;"></i> ${message}`;
-                container.appendChild(toast);
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateX(30px)';
-                    toast.style.transition = '0.3s ease';
-                    setTimeout(() => toast.remove(), 300);
-                }, 5000);
             }
+        }
 
-            // ============================
-            // INIT
-            // ============================
-            loadData();
+        // ============================================================
+        // FILTERS
+        // ============================================================
+        function clearFilters() {
+            document.getElementById('searchReports').value = '';
+            document.getElementById('filterStatus').value = 'all';
+            document.getElementById('filterReason').value = 'all';
             renderReports();
+            showToast('Filters cleared.', 'info');
+        }
 
-            // Check storage on load
-            const initialCheck = checkStorageQuota();
-            if (!initialCheck.available) {
-                showStorageWarning(true, '⚠️ Storage is full! Video files will NOT be saved. Only text reports will be stored.');
-            }
+        // ============================================================
+        // TOAST SYSTEM
+        // ============================================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? 'fa-check-circle' :
+                type === 'error' ? 'fa-exclamation-circle' :
+                'fa-info-circle';
+            toast.innerHTML = `<i class="fas ${icon}" style="font-size:18px;"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(30px)';
+                toast.style.transition = '0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
 
-            console.log('🔍 Emergency Zilm Reports ready!');
-            console.log('📝 Using simple text messages for Discord (no embeds)');
-            console.log('💾 Video files are NOT stored in localStorage to avoid quota issues');
-            console.log('📹 Videos are still sent to Discord with file names and sizes');
-        })();
+        // ============================================================
+        // ESCAPE KEY FOR MODAL
+        // ============================================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        loadData();
+        
+        // Check auth
+        const session = sessionStorage.getItem('ezAdminSession');
+        if (session === 'true') {
+            isLoggedIn = true;
+            document.getElementById('logoutBtn').classList.add('show');
+            document.getElementById('reportsLocked').style.display = 'none';
+            document.getElementById('reportsContent').style.display = 'block';
+            renderReports();
+        }
+
+        document.getElementById('totalReports').textContent = reports.length;
+        document.getElementById('reportCount').textContent = reports.length;
+
+        console.log('🚀 Emergency Zilm Report System ready!');
+        console.log('🔑 Login: admin / emzdev');
+        console.log('📝 Click "Login to View Reports" to login');
+        console.log('👤 Everyone can submit reports');
     </script>
 
 </body>
